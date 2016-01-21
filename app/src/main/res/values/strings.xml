@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">SmartSecurity</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="textAlarm">Alarm</string>
+    <string name="phoneButton1">Add Phone</string>
+    <string name="sensorButton1">Scan for sensors</string>
+</resources>
