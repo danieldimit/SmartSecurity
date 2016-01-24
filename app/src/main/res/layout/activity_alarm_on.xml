@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#333333">
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        />
+
+    <LinearLayout android:id="@+id/message_container"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/warning_top"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center_horizontal"
+            android:text="@string/warning"
+            android:textSize="35sp"
+            android:textColor="#efefef"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-thin"/>
+
+        <TextView
+            android:id="@+id/seconds"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textSize="200sp"
+            android:text="30"
+            android:textColor="#00ccd6"
+            android:fontFamily="sans-serif-medium"/>
+
+        <TextView
+            android:id="@+id/warning_bottom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textAlignment="center"
+            android:text="@string/seconds"
+            android:textSize="35sp"
+            android:textColor="#efefef"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-thin"/>
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="10dp"
+        android:background="#ffd900"
+        />
+
+    <TextView
+        android:id="@+id/cancel_button"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:gravity="center_horizontal"
+        android:text="@string/cancelButton"
+        android:background="#00ccd6"
+        android:textSize="50sp"
+        android:textStyle="bold"
+        android:textColor="#333333"
+        android:fontFamily="sans-serif-light" />
+
+</LinearLayout>
