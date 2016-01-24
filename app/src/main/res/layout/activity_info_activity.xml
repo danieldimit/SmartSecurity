@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#efefef">
+
+    <GridView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/gridView1"
+        android:numColumns="2"
+        android:stretchMode="columnWidth"
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+    </GridView>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="10dp"
+        android:background="#ffd900"
+        />
+
+    <LinearLayout android:id="@+id/footer"
+        android:layout_width="fill_parent"
+        android:layout_height="70dp"
+        android:orientation="horizontal"
+        android:background="#000000"
+        android:layout_alignParentBottom="true">
+
+        <ImageButton
+            android:id="@+id/button_t1t"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:background="#333333"
+            android:layout_weight="1"
+            android:adjustViewBounds="true"
+            android:padding="8dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/notes27"/>
+
+        <ImageButton
+            android:id="@+id/butto11t"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:background="#333333"
+            android:layout_weight="1"
+            android:adjustViewBounds="true"
+            android:padding="8dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/screwdriver26"
+            android:onClick="settingsOnClick"/>
+
+        <ImageButton
+            android:id="@+id/button_t3t"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:background="#333333"
+            android:layout_weight="1"
+            android:adjustViewBounds="true"
+            android:padding="8dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/power2"
+            android:onClick="alarmOnOnClick"/>
+
+    </LinearLayout>
+
+</LinearLayout>

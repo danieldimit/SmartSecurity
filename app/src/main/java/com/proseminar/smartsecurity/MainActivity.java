@@ -118,6 +118,11 @@ public class MainActivity extends AppCompatActivity {
         startActivity(i);
     }
 
+    public void onScanClick(View view) {
+        Intent i = new Intent(this, SettingsActivity.class);
+        startActivity(i);
+    }
+
 
 
     // Don't delete. Will be used later for the overview activity, when the alarm is off.

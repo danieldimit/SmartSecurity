@@ -4,30 +4,38 @@
     android:versionCode="1"
     android:versionName="1.0">
 
+    <uses-sdk android:minSdkVersion="3" />
+    <!--
+    <uses-permission
+        android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    -->
+    <uses-permission android:name="android.permission.SEND_SMS" />
+
     <application
         android:label="@string/app_name"
-        android:theme="@style/AppTheme">
-
+        android:theme="@style/AppTheme.NoActionBar">
         <activity
             android:name=".MainActivity"
-            android:label="@string/app_name"
             android:allowBackup="true"
             android:icon="@mipmap/ic_launcher"
+            android:label="@string/app_name"
             android:supportsRtl="true">
             <intent-filter>
-                <action
-                    android:name="android.intent.action.MAIN" />
-                <category
-                    android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".AddPhoneActivity"></activity>
+        <activity android:name=".AddPhoneActivity" />
+        <activity android:name=".SettingsActivity" />
+        <activity android:name=".AlarmOnActivity" />
+        <activity android:name=".InfoActivity" />
+
         <service
             android:name=".SensorDataCollectorService"
             android:process=":remote">
             <intent-filter>
-                <action
-                    android:name="com.proseminar.smartsecurity.SensorDataCollectorService" />
+                <action android:name="com.proseminar.smartsecurity.SensorDataCollectorService" />
             </intent-filter>
         </service>
 
@@ -41,13 +49,7 @@
             </intent-filter>
         </receiver>
         -->
+
     </application>
-    <uses-sdk
-        android:minSdkVersion="3" />
-    <!--
-    <uses-permission
-        android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    -->
-    <uses-permission android:name="android.permission.SEND_SMS" />
 
 </manifest>
