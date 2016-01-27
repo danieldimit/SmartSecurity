@@ -4,27 +4,35 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal">
 
-    <TextView
-        android:id="@+id/tvName"
+    <LinearLayout android:id="@+id/name_and_number_container"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="15dp"
-        android:layout_marginStart="15dp"
-        android:singleLine="true"
-        android:text="Name"
-        android:textSize="25sp"
-        android:fontFamily="sans-serif-light"/>
+        android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/tvNumber"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginStart="10dp"
-        android:singleLine="true"
-        android:text="Number"
-        android:textSize="20sp"
-        android:fontFamily="sans-serif-light"/>
+        <TextView
+            android:id="@+id/tvName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:layout_marginStart="15dp"
+            android:singleLine="true"
+            android:text="Name"
+            android:textSize="30sp"
+            android:fontFamily="sans-serif-light"/>
+
+        <TextView
+            android:id="@+id/tvNumber"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:layout_marginStart="15dp"
+            android:singleLine="true"
+            android:text="Number"
+            android:textSize="15sp"
+            android:fontFamily="sans-serif-light"/>
+
+    </LinearLayout>
+
 
     <View
         android:layout_width="0dp"
@@ -35,9 +43,10 @@
     <ImageButton
         android:id="@+id/button_edit"
         android:layout_width="30dp"
-        android:layout_height="match_parent"
+        android:layout_height="30dp"
         android:layout_marginEnd="10dp"
         android:layout_marginRight="10dp"
+        android:layout_gravity="center_vertical"
         android:adjustViewBounds="true"
         android:padding="1dp"
         android:scaleType="fitCenter"
@@ -47,9 +56,10 @@
     <ImageButton
         android:id="@+id/button_delete"
         android:layout_width="30dp"
-        android:layout_height="match_parent"
+        android:layout_height="30dp"
         android:layout_marginEnd="15dp"
         android:layout_marginRight="15dp"
+        android:layout_gravity="center_vertical"
         android:adjustViewBounds="true"
         android:padding="1dp"
         android:scaleType="fitCenter"
