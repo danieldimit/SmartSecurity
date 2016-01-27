@@ -1,13 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="Encoding">
-    <file url="file://$PROJECT_DIR$/app/src/main/aidl/com/proseminar/smartsecurity/SensorDataCollectorListener.aidl" charset="windows-1252" />
-    <file url="file://$PROJECT_DIR$/app/src/main/aidl/com/proseminar/smartsecurity/SensorDataUpdateResult.aidl" charset="windows-1252" />
-    <file url="file://$PROJECT_DIR$/app/src/main/java/com/proseminar/smartsecurity/BootReceiver.java" charset="windows-1252" />
-    <file url="file://$PROJECT_DIR$/app/src/main/java/com/proseminar/smartsecurity/SensorData.java" charset="windows-1252" />
-    <file url="file://$PROJECT_DIR$/app/src/main/java/com/proseminar/smartsecurity/SensorDataCollectorService.java" charset="windows-1252" />
-    <file url="file://$PROJECT_DIR$/app/src/main/java/com/proseminar/smartsecurity/SensorDataUpdateResult.java" charset="windows-1252" />
-    <file url="file://$PROJECT_DIR$/app/src/main/java/com/proseminar/smartsecurity/SensorDataUpdater.java" charset="windows-1252" />
     <file url="PROJECT" charset="UTF-8" />
   </component>
 </project>
