@@ -148,7 +148,6 @@
         android:layout_width="fill_parent"
         android:layout_height="70dp"
         android:orientation="horizontal"
-        android:background="#000000"
         android:layout_alignParentBottom="true">
 
         <ImageButton

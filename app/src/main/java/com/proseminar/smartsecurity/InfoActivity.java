@@ -19,6 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Daniel on 24/01/2016.
@@ -35,8 +36,12 @@ public class InfoActivity extends AppCompatActivity {
     private SharedPreferences mPrefs;
     private boolean currentStatus;
 
+    boolean connected;
+
     // UI Elements
     GridView gridView;
+
+    List<SensorData> sDataList;
 
     private ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
@@ -47,6 +52,7 @@ public class InfoActivity extends AppCompatActivity {
             api = SensorDataCollectorApi.Stub.asInterface(service);
             try {
                 api.addListener(collectorListener);
+                connected = true;
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to add listener", e);
             }
@@ -56,6 +62,7 @@ public class InfoActivity extends AppCompatActivity {
         @Override
         public void onServiceDisconnected(ComponentName name) {
             Log.i(TAG, "Service connection closed");
+            connected = false;
         }
     };
 
@@ -74,16 +81,15 @@ public class InfoActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mPrefs = getSharedPreferences("azis" ,Context.MODE_PRIVATE);
+
+
+        mPrefs = getSharedPreferences("latest_alarm_status", Context.MODE_PRIVATE);
         currentStatus = mPrefs.getBoolean(KEY, OFF);
 
         Log.e(TAG, Boolean.toString(currentStatus));
-        Log.e(TAG, "v on create sum pi4");
         if (currentStatus) {
             Intent i = new Intent(this, AlarmOnActivity.class);
             startActivity(i);
-        } else {
-            initializeInfoUI();
         }
     }
 
@@ -106,6 +112,7 @@ public class InfoActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        connected = false;
         initializeInfoUI();
     }
 
@@ -114,13 +121,9 @@ public class InfoActivity extends AppCompatActivity {
 
         //Intent intent = new Intent(SensorDataCollectorService.class.getName());
         Intent intent = new Intent(this, SensorDataCollectorService.class);
-
-        // start the service explicitly.
-        // otherwise it will only run while the IPC connection is up.
-        //startService(intent);
         this.startService(intent);
 
-        //bindService(intent, serviceConnection, 0);
+        bindService(intent, serviceConnection, 0);
 
         Log.i(TAG, "Activity created");
 
@@ -132,11 +135,24 @@ public class InfoActivity extends AppCompatActivity {
         // Attach the adapter to a ListView
         gridView.setAdapter(adapter);
 
-        // Fill with Dummy items
-        for (int i=0; i<25; i++) {
-            SensorData newUser = new SensorData("Nathan", 4.2, 3.2, 4.2);
-            adapter.add(newUser);
+        /** TODO: NEEDS FIXING NUllpointerexception
+
+        while (connected == false) {
+            try {
+                SensorDataUpdateResult sdur = api.getLatestUpdateResult();
+                sDataList = sdur.getSensorData();
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
         }
+        // Fill with Dummy items
+        if (!(sDataList == null)) {
+            for (SensorData sd : sDataList) {
+                adapter.add(sd);
+            }
+        }
+
+         */
     }
 
     public void alarmOnOnClick(View v) {

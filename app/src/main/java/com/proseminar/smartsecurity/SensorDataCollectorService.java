@@ -6,9 +6,12 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.util.Log;
 
 /**
@@ -16,10 +19,18 @@ import android.util.Log;
  * service process(this process) and the activity process(the UI).
  */
 public class SensorDataCollectorService extends Service {
-	
+
+	// Constants
 	private static final String TAG = SensorDataCollectorService.class.getSimpleName();
-	private static final int ALARM_MODE = 1;
-	private static final int INFO_MODE = 0;
+	static final boolean ON = true;
+	static final boolean OFF = false;
+	static final String KEY = "alarm_status";
+
+	// Recalls the last state - ON or OFF
+	private SharedPreferences mPrefs;
+	private boolean currentStatus;
+
+    Context context = this;
 	
 	private Timer timer;
 
@@ -30,8 +41,8 @@ public class SensorDataCollectorService extends Service {
 		public void run() {
 			try {
 				SensorDataUpdater updater = new SensorDataUpdater();
-				SensorDataUpdateResult newUpdateResult = updater.update();
-				// Log.d(TAG, "Retrieved Data from " + newUpdateResult.getSensorData().size() + " sensor(s)");
+				SensorDataUpdateResult newUpdateResult = updater.update(context);
+				Log.d(TAG, "++++++++++++++Retrieved Data from " + newUpdateResult.getSensorData().size() + " sensor(s)");
 				counter++;
 				Log.e(TAG, Integer.toString(counter));
 
@@ -55,6 +66,9 @@ public class SensorDataCollectorService extends Service {
 			}
 		}
 	};
+
+
+
 	
 	private final Object latestUpdateResultLock = new Object();
 	
@@ -75,8 +89,12 @@ public class SensorDataCollectorService extends Service {
 		}
 
 		@Override
-		public void turnServiceOff() {
-			stopSelf();
+		public void notifyAlarmStatusChanged(boolean alarmStatus) {
+			if (alarmStatus == ON) {
+                goInAlarmMode();
+            } else {
+                goInInfoMode();
+            }
 		}
 		
 		@Override
@@ -84,6 +102,7 @@ public class SensorDataCollectorService extends Service {
 				throws RemoteException {
 			
 			synchronized (listeners) {
+				Log.e(TAG, "+++++++++++++++++++++ ADDED LISTENER");
 				listeners.add(listener);
 			}
 		}
@@ -93,6 +112,7 @@ public class SensorDataCollectorService extends Service {
 				throws RemoteException {
 			
 			synchronized (listeners) {
+				Log.e(TAG, "+++++++++++++++++++++ REMOVED LISTENER+++++++++++++++++++++");
 				listeners.remove(listener);
 			}
 		}
@@ -105,37 +125,56 @@ public class SensorDataCollectorService extends Service {
 			Log.d(TAG, "Bound by intent " + intent);
 			return apiEndpoint;
 		} else {
+			Log.d(TAG, "Denied bounding");
 			return null;
 		}
 	}
 
 
+    /**
+     * Read a file that remembers the last state of the program, because when
+     * the App gets killed the Service restarts and doesn't know if it must be in Alarm mode
+     * or Info mode.
+     * Alarm mode: Don't update info for the UI process and get updates from the sensors every
+     * 1 second.
+     * Info mode: only while UI process is bound to the Service, get updates from the sensors
+     * every 10 seconds.
+     */
 	@Override
 	public void onCreate() {
 		super.onCreate();
 		Log.i(TAG, "Service created");
 		counter = 0;
-		/**
-		 * TODO: read a file that remembers the last state of the program, because when
-		 * the App gets killed the Service restarts and doesn't know if it must be in Alarm mode
-		 * or Info mode.
-		 * Alarm mode: Don't update info for the UI process and get updates from the sensors every
-		 * 1 second.
-		 * Info mode: only while UI process is bound to the Service, get updates from the sensors
-		 * every 10 seconds.
-		 */
-		
-		timer = new Timer("SensorDataCollectorTimer");
-		// Update every 60 sec
-		timer.schedule(updateTask, 1000L, 1000L);
+        timer = new Timer ("SensorDataCollectorTimer");
+        timer.schedule(updateTask, 5000L, 1000L);
+
+        mPrefs = getSharedPreferences("latest_alarm_status", Context.MODE_PRIVATE);
+        currentStatus = mPrefs.getBoolean(KEY, ON);
+
+        if (currentStatus) {
+            goInAlarmMode();
+        } else {
+            goInInfoMode();
+        }
+
 	}
 
 	@Override
 	public void onDestroy() {
 		super.onDestroy();
 		Log.i(TAG, "Service destroyed");
-		
-		timer.cancel();
-		timer = null;
+
+        timer.cancel();
+        timer = null;
+    }
+
+	private void goInAlarmMode() {
+
+		Log.i(TAG, "++++++++++++++ alarm mode on");
+	}
+
+	private void goInInfoMode() {
+
+		Log.i(TAG, "++++++++++++++ info mode on");
 	}
 }

@@ -1,10 +1,14 @@
 package com.proseminar.smartsecurity;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -34,15 +38,45 @@ public class AlarmOnActivity extends AppCompatActivity {
     // Count down timers
     private CountDownTimer turnOnTimer;
 
+    private SensorDataCollectorApi api;
+
+    private SensorDataCollectorListener.Stub collectorListener = new SensorDataCollectorListener.Stub() {
+        @Override
+        public void handleSensorDataUpdated() throws RemoteException {
+        }
+    };
+
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            Log.i(TAG, "Service connection established");
+
+            // that's how we get the client side of the IPC connection
+            api = SensorDataCollectorApi.Stub.asInterface(service);
+            try {
+                api.addListener(collectorListener);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to add listener", e);
+            }
+            // updateTweetView();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Log.i(TAG, "Service connection closed");
+        }
+    };
+
     // BIND TO SERVICE TO TELL IT TURN ON AND OFF
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mPrefs = getSharedPreferences("azis", Context.MODE_PRIVATE);
+        mPrefs = getSharedPreferences("latest_alarm_status", Context.MODE_PRIVATE);
         currentStatus = mPrefs.getBoolean(KEY, OFF);
         updater = mPrefs.edit();
 
+        Log.e(TAG, "+++++++++++++++ ON CREATE");
         // Set different layouts depending on the status of the alarm.
         if (currentStatus) {
             setContentView(R.layout.activity_alarm_on);
@@ -51,10 +85,6 @@ public class AlarmOnActivity extends AppCompatActivity {
             tvSeconds = (TextView) findViewById(R.id.seconds);
         }
         initButton();
-        // TODO: Should have all the connection stuff that the InfoActivity and the MainActivity have.
-
-
-
 
         if (!currentStatus) {
             // Timer counting down the time until the alarm gets turned on
@@ -72,8 +102,45 @@ public class AlarmOnActivity extends AppCompatActivity {
                     setContentView(R.layout.activity_alarm_on);
                     initButton();
                 }
-            }.start();
+            };
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.e(TAG, "++++++++++++ON RESUME");
+
+        // Start/Restart timer
+        if (!currentStatus) {
+            turnOnTimer.start();
+        }
+
+        Intent intent = new Intent(SensorDataCollectorService.class.getName());
+        // start the service explicitly.
+        // otherwise it will only run while the IPC connection is up.
+        this.startService(intent);
+        bindService(intent, serviceConnection, 0);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (!(turnOnTimer == null)) {
+            turnOnTimer.cancel();
+        }
+        unbindService();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.e(TAG, "+++++++++++++++DSTRY");
+        if (!(turnOnTimer == null)) {
+            turnOnTimer.cancel();
+        }
+        turnAlarmOff();
+        unbindService();
     }
 
     public void initButton() {
@@ -100,25 +167,41 @@ public class AlarmOnActivity extends AppCompatActivity {
     private void turnAlarmOn() {
         updater.putBoolean(KEY, ON);
         updater.commit();
-        if (mPrefs.getBoolean(KEY, ON)) {
+        currentStatus = mPrefs.getBoolean(KEY, OFF);
+        if (currentStatus) {
             Log.e(TAG, "ON");
+        }
+        try {
+            api.notifyAlarmStatusChanged(currentStatus);
+        } catch (RemoteException e) {
+            e.printStackTrace();
         }
     }
 
     private void turnAlarmOff() {
         updater.putBoolean(KEY, OFF);
         updater.commit();
-        if (!mPrefs.getBoolean(KEY, ON)) {
+        currentStatus = mPrefs.getBoolean(KEY, OFF);
+        if (!currentStatus) {
             Log.e(TAG, "OFF");
+        }
+        try {
+            api.notifyAlarmStatusChanged(currentStatus);
+        } catch (RemoteException e) {
+            e.printStackTrace();
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (!(turnOnTimer == null)) {
-            turnOnTimer.cancel();
+    private void unbindService() {
+        try {
+            api.removeListener(collectorListener);
+            unbindService(serviceConnection);
+        } catch (Throwable t) {
+            // catch any issues, typical for destroy routines
+            // even if we failed to destroy something, we need to continue destroying
+            Log.w(TAG, "Failed to unbind from the service", t);
         }
-        turnAlarmOff();
     }
+
+
 }

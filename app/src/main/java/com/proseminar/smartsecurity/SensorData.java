@@ -25,8 +25,10 @@ public final class SensorData implements Parcelable {
 	private double temp;
 	private double humidity;
 	private double accelometer;
+	private String name;
 
-	public SensorData(String sensorId, double temp, double humidity, double accelometer) {
+	public SensorData(String name, String sensorId, double temp, double humidity, double accelometer) {
+		this.name = name;
 		this.sensorId = sensorId;
 		this.temp = temp;
 		this.humidity = humidity;
@@ -38,6 +40,18 @@ public final class SensorData implements Parcelable {
 		temp = source.readDouble();
 		humidity = source.readDouble();
 		accelometer = source.readDouble();
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setSensorId(String sensorId) {
+		this.sensorId = sensorId;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public String getSensorId() {

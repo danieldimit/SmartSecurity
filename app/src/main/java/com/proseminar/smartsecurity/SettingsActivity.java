@@ -39,6 +39,14 @@ public class SettingsActivity extends AppCompatActivity {
 
     DbHandler myHandle;
 
+    //Sensor variables:
+    ImageButton addSensors;
+    ImageButton[] updaterButtonSensors = new ImageButton[100];
+    TextView[] myAwesomeNameViewSensors = new TextView[100];
+    ImageButton[] destoyerButtonSensors = new ImageButton[100];
+    SensorDbHandler mySensorHandler;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -52,7 +60,7 @@ public class SettingsActivity extends AppCompatActivity {
 
                 // get prompts.xml view
                 LayoutInflater layoutInflater = LayoutInflater.from(SettingsActivity.this);
-                View promptView = layoutInflater.inflate(R.layout.input_dialog, null);
+                View promptView = layoutInflater.inflate(R.layout.input_dialog_add_contact, null);
                 AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(SettingsActivity.this);
                 alertDialogBuilder.setView(promptView);
 
@@ -117,15 +125,32 @@ public class SettingsActivity extends AppCompatActivity {
                 }
         }
 
-
+        addSensors = (ImageButton) findViewById(R.id.button_add_new_sensor);
+        addSensors.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Intent i = new Intent(SettingsActivity.this, SensorListActivity.class);
+                startActivity(i);
+            }
+        });
+        mySensorHandler = new SensorDbHandler(this, "doesn't matter", null ,1);
         LinearLayout sensorslist = (LinearLayout) findViewById(R.id.list_sensors);
         ArrayList<LinearLayout> sensorsReadFromFile = new ArrayList<>();
-        for (int i=0; i<9;i++){
-            sensorsReadFromFile.add((LinearLayout) LayoutInflater.from(this).inflate(R.layout.list_item_sensors, null));
-        }
-
-        for (int i=0; i<9;i++){
-            sensorslist.addView(sensorsReadFromFile.get(i));
+        Sensor[] sensors = mySensorHandler.databaseToString();
+        if (sensors != null) {
+            for (int i = 0; i < sensors.length; i++){
+                sensorslist.addView((LinearLayout) LayoutInflater.from(this).inflate(R.layout.list_item_paired_sensor, null));
+                myAwesomeNameViewSensors[i] = (TextView) findViewById(R.id.tvNameSensor);
+                if (sensors[i].getName() != null) {
+                    myAwesomeNameViewSensors[i].setText(sensors[i].getName());
+                }
+                myAwesomeNameViewSensors[i].setId(i+500);
+                updaterButtonSensors[i] = (ImageButton) findViewById(R.id.button_edit_sensors);
+                updaterButtonSensors[i].setId(i+600);
+                updaterButtonSensors[i].setOnClickListener(sensorUpdater);
+                destoyerButtonSensors[i] = (ImageButton) findViewById(R.id.button_delete_sensors);
+                destoyerButtonSensors[i].setId(i+700);
+                destoyerButtonSensors[i].setOnClickListener(sensorDestroyer);
+            }
         }
     }
 
@@ -141,7 +166,7 @@ public class SettingsActivity extends AppCompatActivity {
             final int number1 = number;
             // Alert Dialog Code Start
             LayoutInflater layoutInflater = LayoutInflater.from(SettingsActivity.this);
-            View promptView = layoutInflater.inflate(R.layout.input_dialog_update, null);
+            View promptView = layoutInflater.inflate(R.layout.input_dialog_update_contact, null);
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(SettingsActivity.this);
             alertDialogBuilder.setView(promptView);
 
@@ -247,6 +272,96 @@ public class SettingsActivity extends AppCompatActivity {
         // show it
         alertDialog.show();
     }
+
+    View.OnClickListener sensorUpdater = new View.OnClickListener() {
+        public void onClick(View v) {
+            int number = 0;
+            for (int i = 0; i<100; i++){
+                if (v == updaterButtonSensors[i]) {
+                    number = i;
+                    break;
+                }
+            }
+            final int number1 = number;
+            // Alert Dialog Code Start
+            LayoutInflater layoutInflater = LayoutInflater.from(SettingsActivity.this);
+            View promptView = layoutInflater.inflate(R.layout.input_dialog_update_sensors, null);
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(SettingsActivity.this);
+            alertDialogBuilder.setView(promptView);
+
+            final EditText name = (EditText) promptView.findViewById(R.id.pimpMySensorName);
+            name.setText(myAwesomeNameViewSensors[number1].getText().toString());
+
+            // setup a dialog window
+            alertDialogBuilder.setCancelable(false)
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            if ((name.getEditableText().toString().trim().length() == 0)) {
+                                emptyFields();
+                            } else {
+                                Sensor sensorHolderOld = new Sensor(myAwesomeNameViewSensors[number1].getText().toString(), null);
+                                Sensor sensorHolderNew = new Sensor(name.getEditableText().toString(), null);
+                                mySensorHandler.updateRow(sensorHolderOld, sensorHolderNew);
+                                Intent intent = getIntent();
+                                finish();
+                                startActivity(intent);
+                            }
+                        }
+                    })
+                    .setNegativeButton("Cancel",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    dialog.cancel();
+                                }
+                            });
+            // create an alert dialog
+            AlertDialog alert = alertDialogBuilder.create();
+            alert.show();
+        }
+    };
+
+    //method to delete entry
+    View.OnClickListener sensorDestroyer = new View.OnClickListener() {
+        public void onClick(View v) {
+            int position =0;
+            for (int i = 0; i<100; i++){
+                if (v == destoyerButtonSensors[i]) {
+                    position = i;
+                    break;
+                }
+            }
+            final int i = position;
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                    context);
+            // set title
+            alertDialogBuilder.setTitle("Delete Contact");
+            // set dialog message
+            alertDialogBuilder
+                    .setMessage("Click yes to delete!")
+                    .setCancelable(false)
+                    .setPositiveButton("Yes",new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog,int id) {
+                            Sensor sensorHolder = new Sensor(myAwesomeNameViewSensors[i].getText().toString(), null);
+                            mySensorHandler.deleteSensor(sensorHolder);
+                            Intent intent = getIntent();
+                            finish();
+                            startActivity(intent);
+                        }
+                    })
+                    .setNegativeButton("No",new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog,int id) {
+                            // if this button is clicked, just close
+                            // the dialog box and do nothing
+                            dialog.cancel();
+                        }
+                    });
+            // create alert dialog
+            AlertDialog alertDialog = alertDialogBuilder.create();
+            // show it
+            alertDialog.show();
+        }
+    };
+
 
     public void alarmOnOnClick(View v) {
         Intent i = new Intent(this, AlarmOnActivity.class);
