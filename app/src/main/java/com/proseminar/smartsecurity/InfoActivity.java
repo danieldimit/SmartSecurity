@@ -1,5 +1,6 @@
 package com.proseminar.smartsecurity;
 
+import android.bluetooth.BluetoothAdapter;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -21,6 +22,8 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.support.v4.app.ActivityCompat.startActivityForResult;
+
 /**
  * Created by Daniel on 24/01/2016.
  */
@@ -37,6 +40,9 @@ public class InfoActivity extends AppCompatActivity {
     private boolean currentStatus;
 
     boolean connected;
+
+    BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+    private final static int REQUEST_ENABLE_BT=1;
 
     // UI Elements
     GridView gridView;
@@ -113,6 +119,10 @@ public class InfoActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         connected = false;
+        if (!mBluetoothAdapter.isEnabled()) {
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+        }
         initializeInfoUI();
     }
 
