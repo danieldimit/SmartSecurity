@@ -172,6 +172,7 @@ public class SensorListActivity extends AppCompatActivity {
                             Sensor sensor = new Sensor(name.getText().toString(), macAdress);
                             mySensorHandle.addSensors(sensor);
                             Intent i = new Intent(SensorListActivity.this, SettingsActivity.class);
+                            SensorCollection.addSensor(sensor);
                             finish();
                             startActivity(i);
                         }

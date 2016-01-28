@@ -8,7 +8,7 @@ import java.util.ArrayList;
  * Created by Joachim on 26.01.2016.
  */
 public class Sensor {
-	private static int numberOfPastValues = 60;
+	private static int numberOfPastValues = 10;
 	private static int numberOfPredictedValues = 5;
 	private static int weightNewerValues = 3;
 	private static double halfConfCap = 0.2;
