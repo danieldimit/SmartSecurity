@@ -49,6 +49,8 @@ public class InfoActivity extends AppCompatActivity {
 
     List<SensorData> sDataList;
 
+    Context context = this;
+
     private ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -62,7 +64,7 @@ public class InfoActivity extends AppCompatActivity {
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to add listener", e);
             }
-            // updateTweetView();
+            updateGridView();
         }
 
         @Override
@@ -130,7 +132,7 @@ public class InfoActivity extends AppCompatActivity {
         setContentView(R.layout.activity_info_activity);
 
         //Intent intent = new Intent(SensorDataCollectorService.class.getName());
-        Intent intent = new Intent(this, SensorDataCollectorService.class);
+        Intent intent = new Intent(SensorDataCollectorService.class.getName());
         this.startService(intent);
 
         bindService(intent, serviceConnection, 0);
@@ -138,31 +140,7 @@ public class InfoActivity extends AppCompatActivity {
         Log.i(TAG, "Activity created");
 
         gridView = (GridView) findViewById(R.id.gridView1);
-        // Construct the data source
-        ArrayList<SensorData> arrayOfUsers = new ArrayList<SensorData>();
-        // Create the adapter to convert the array to views
-        SensorDataAdapter adapter = new SensorDataAdapter(this, arrayOfUsers);
-        // Attach the adapter to a ListView
-        gridView.setAdapter(adapter);
 
-        /** TODO: NEEDS FIXING NUllpointerexception
-
-        while (connected == false) {
-            try {
-                SensorDataUpdateResult sdur = api.getLatestUpdateResult();
-                sDataList = sdur.getSensorData();
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
-        }
-        // Fill with Dummy items
-        if (!(sDataList == null)) {
-            for (SensorData sd : sDataList) {
-                adapter.add(sd);
-            }
-        }
-
-         */
     }
 
     public void alarmOnOnClick(View v) {
@@ -173,5 +151,31 @@ public class InfoActivity extends AppCompatActivity {
     public void settingsOnClick(View v) {
         Intent i = new Intent(this, SettingsActivity.class);
         startActivity(i);
+    }
+
+    public void overviewOnClick(View v) {
+        updateGridView();
+    }
+
+
+    private void updateGridView() {
+        // Construct the data source
+        ArrayList<SensorData> arrayOfUsers = new ArrayList<SensorData>();
+        // Create the adapter to convert the array to views
+        SensorDataAdapter adapter = new SensorDataAdapter(context, arrayOfUsers);
+        // Attach the adapter to a ListView
+        gridView.setAdapter(adapter);
+        try {
+            SensorDataUpdateResult sdur = api.getLatestUpdateResult();
+            sDataList = sdur.getSensorData();
+            // Fill with Dummy items
+            if (!(sDataList == null)) {
+                for (SensorData sd : sDataList) {
+                    adapter.add(sd);
+                }
+            }
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 }

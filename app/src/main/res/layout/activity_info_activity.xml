@@ -36,7 +36,8 @@
             android:adjustViewBounds="true"
             android:padding="8dp"
             android:scaleType="fitCenter"
-            android:src="@drawable/notes27"/>
+            android:src="@drawable/notes27"
+            android:onClick="overviewOnClick"/>
 
         <ImageButton
             android:id="@+id/butto11t"
