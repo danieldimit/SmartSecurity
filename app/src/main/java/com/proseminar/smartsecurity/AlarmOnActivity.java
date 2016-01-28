@@ -87,8 +87,8 @@ public class AlarmOnActivity extends AppCompatActivity {
         initButton();
 
         if (!currentStatus) {
-            // Timer counting down the time until the alarm gets turned on
-            turnOnTimer = new CountDownTimer(30000, 1000) {
+            // Timer counting down the time until the alarm gets turned on (30 000)
+            turnOnTimer = new CountDownTimer(2000, 1000) {
 
                 public void onTick(long millisUntilFinished) {
                     tvSeconds.setText(Integer.toString((int) (millisUntilFinished / 1000)));

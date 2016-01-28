@@ -97,6 +97,8 @@ public class SensorDataCollectorService extends Service {
 
 		@Override
 		public void notifyAlarmStatusChanged(boolean alarmStatus) {
+			logic.reset();
+			currentStatus = alarmStatus;
 			if (alarmStatus == ON) {
                 goInAlarmMode();
             } else {
@@ -152,7 +154,7 @@ public class SensorDataCollectorService extends Service {
 		super.onCreate();
 		Log.i(TAG, "Service created");
 		counter = 0;
-		logic = new SensorCollection();
+		logic = new SensorCollection(context);
 
         timer = new Timer ("SensorDataCollectorTimer");
         timer.schedule(updateTask, 5000L, 1000L);
@@ -165,7 +167,6 @@ public class SensorDataCollectorService extends Service {
         } else {
             goInInfoMode();
         }
-
 	}
 
 	@Override
