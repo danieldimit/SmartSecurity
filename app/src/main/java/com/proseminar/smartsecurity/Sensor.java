@@ -15,25 +15,27 @@ public class Sensor {
 
     private static ArrayList<String> sensorNames = new ArrayList<String>();
 
-    private String sensorID;
+    private String sensorId;
+    private String name;
     private double[] temperature;
     private double[] accelerometer;
     private int valIndex;
     private int dataCounter;
 
-    public Sensor(String sensorID) {
+    public Sensor(String name, String sensorId) {
         for (String str : sensorNames)
-            if (str.equals(sensorID))
-                throw new IllegalArgumentException("The name " + sensorID + " has already been taken.");
+            if (str.equals(sensorId))
+                throw new IllegalArgumentException("The name " + sensorId + " has already been taken.");
 
-        this.sensorID = sensorID;
+        this.sensorId = sensorId;
+        this.name = name;
         temperature = new double[numberOfPastValues];
         valIndex = 0;
         dataCounter = 0;
     }
 
     public boolean idFits(SensorData sd) {
-        return sensorID.equals(sd.getSensorId());
+        return sensorId.equals(sd.getSensorId());
     }
 
     public void resetData() {
@@ -43,7 +45,7 @@ public class Sensor {
         dataCounter = 0;
     }
 
-    // adds the new value to the array and returns true if there's enough data collected to start identifying possible threats
+    // adds the newest value to the array and returns true if there's enough data collected to start identifying possible threats
     public boolean updateSensorData(SensorData sd) {
         double newTemp = sd.getTemp();
 
@@ -122,4 +124,10 @@ public class Sensor {
 
         return confidence;
     }
+
+    public String getSensorId() { return sensorId; }
+
+    public String getName() { return name; }
+
+    public void setName(String name) { this.name = name; }
 }

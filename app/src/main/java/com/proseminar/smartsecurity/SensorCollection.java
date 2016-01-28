@@ -11,13 +11,13 @@ public class SensorCollection {
 
     public SensorCollection() { sensors = new ArrayList<Sensor>();}
 
-    public void update(SensorDataUpdateResult newVals, String telNumber) {
+    public void update(SensorDataUpdateResult newVals, boolean alarmIsOn) {
         for (SensorData sd : newVals.getSensorData())
             for (Sensor sensor : sensors)
                 if (sensor.idFits(sd)) {
                     if (sensor.updateSensorData(sd))
-                        if (sensor.calcRobberyConfidence() >= 0.5)
-                            Sms.sendSMS(telNumber, "SmartSecurity detected a possible threat ");
+                        if (alarmIsOn && sensor.calcRobberyConfidence() >= 0.5)
+                            Sms.sendSMS("todo", "SmartSecurity detected a possible threat ");
                     break;
                 }
 
@@ -28,6 +28,9 @@ public class SensorCollection {
         sensors.add(sensor);
     }
 
+    public void removeSensor(String sensorId) {
+        //
+    }
 }
 
 
