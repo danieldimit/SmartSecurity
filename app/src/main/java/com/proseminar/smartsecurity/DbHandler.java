@@ -89,4 +89,6 @@ public class DbHandler extends SQLiteOpenHelper{
             db.close();
             return contact;
     }
+
+
 }

@@ -34,6 +34,7 @@ public class SensorDataCollectorService extends Service {
 	private boolean currentStatus;
 
 
+	private SensorCollection logic;
 
     Context context = this;
 	
@@ -48,6 +49,7 @@ public class SensorDataCollectorService extends Service {
 				SensorDataUpdater updater = new SensorDataUpdater();
 				SensorDataUpdateResult newUpdateResult = updater.update(context);
 				Log.d(TAG, "++++++++++++++Retrieved Data from " + newUpdateResult.getSensorData().size() + " sensor(s)");
+				logic.update(newUpdateResult, currentStatus);
 				counter++;
 				Log.e(TAG, Integer.toString(counter));
 
@@ -150,6 +152,7 @@ public class SensorDataCollectorService extends Service {
 		super.onCreate();
 		Log.i(TAG, "Service created");
 		counter = 0;
+		logic = new SensorCollection();
 
         timer = new Timer ("SensorDataCollectorTimer");
         timer.schedule(updateTask, 5000L, 1000L);
