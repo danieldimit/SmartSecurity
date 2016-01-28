@@ -7,9 +7,6 @@ import android.os.Parcelable;
 public final class Sensor {
 
 	private String sensorId;
-	private double temp;
-	private double humidity;
-	private double accelometer;
 	private String name;
 
 	public Sensor(String name, String sensorId) {

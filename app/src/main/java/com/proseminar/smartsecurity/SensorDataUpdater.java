@@ -55,7 +55,7 @@ public final class SensorDataUpdater {
 	}
 
 	private int genTemp() {
-		int min = 15;
+		int min = -15;
 		int max = 20;
 		int value = max - min;
 
