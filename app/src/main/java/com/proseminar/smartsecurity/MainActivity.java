@@ -67,8 +67,17 @@ public class MainActivity extends AppCompatActivity {
         // tweetView = (TextView) findViewById(R.id.tweet_view);
 
         //Intent intent = new Intent(SensorDataCollectorService.class.getName());
-        Intent intent = new Intent(this, SensorDataCollectorService.class);
+        Intent intent;
+        int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+        if (currentapiVersion >= android.os.Build.VERSION_CODES.LOLLIPOP){
+            // Do something for lollipop and above versions
 
+            intent = new Intent(this, SensorDataCollectorService.class);
+        } else{
+            // do something for phones running an SDK before lollipop
+
+            intent = new Intent(SensorDataCollectorService.class.getName());
+        }
         // start the service explicitly.
         // otherwise it will only run while the IPC connection is up.
         //startService(intent);
@@ -91,7 +100,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onToggle(View view) throws RemoteException {
-        Intent intent = new Intent(SensorDataCollectorService.class.getName());
+        Intent intent;
+        int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+        if (currentapiVersion >= android.os.Build.VERSION_CODES.LOLLIPOP){
+            // Do something for lollipop and above versions
+
+            intent = new Intent(this, SensorDataCollectorService.class);
+        } else{
+            // do something for phones running an SDK before lollipop
+
+            intent = new Intent(SensorDataCollectorService.class.getName());
+        }
         if (!mBound) {
             Log.w(TAG, "++ START & BIND ++");
             startService(intent);

@@ -116,7 +116,17 @@ public class AlarmOnActivity extends AppCompatActivity {
             turnOnTimer.start();
         }
 
-        Intent intent = new Intent(SensorDataCollectorService.class.getName());
+        Intent intent;
+        int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+        if (currentapiVersion >= android.os.Build.VERSION_CODES.LOLLIPOP){
+            // Do something for lollipop and above versions
+
+            intent = new Intent(this, SensorDataCollectorService.class);
+        } else{
+            // do something for phones running an SDK before lollipop
+
+            intent = new Intent(SensorDataCollectorService.class.getName());
+        }
         // start the service explicitly.
         // otherwise it will only run while the IPC connection is up.
         this.startService(intent);

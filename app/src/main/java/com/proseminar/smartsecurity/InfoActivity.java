@@ -132,7 +132,17 @@ public class InfoActivity extends AppCompatActivity {
         setContentView(R.layout.activity_info_activity);
 
         //Intent intent = new Intent(SensorDataCollectorService.class.getName());
-        Intent intent = new Intent(SensorDataCollectorService.class.getName());
+        Intent intent;
+        int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+        if (currentapiVersion >= android.os.Build.VERSION_CODES.LOLLIPOP){
+            // Do something for lollipop and above versions
+
+            intent = new Intent(this, SensorDataCollectorService.class);
+        } else{
+            // do something for phones running an SDK before lollipop
+
+            intent = new Intent(SensorDataCollectorService.class.getName());
+        }
         this.startService(intent);
 
         bindService(intent, serviceConnection, 0);
