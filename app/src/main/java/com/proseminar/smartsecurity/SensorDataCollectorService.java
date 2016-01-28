@@ -6,6 +6,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import android.app.Service;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -13,6 +14,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Log;
+
+import static android.support.v4.app.ActivityCompat.startActivityForResult;
 
 /**
  * A Service class, that runs in the background and implements the connection between the
@@ -29,6 +32,8 @@ public class SensorDataCollectorService extends Service {
 	// Recalls the last state - ON or OFF
 	private SharedPreferences mPrefs;
 	private boolean currentStatus;
+
+
 
     Context context = this;
 	
@@ -145,6 +150,7 @@ public class SensorDataCollectorService extends Service {
 		super.onCreate();
 		Log.i(TAG, "Service created");
 		counter = 0;
+
         timer = new Timer ("SensorDataCollectorTimer");
         timer.schedule(updateTask, 5000L, 1000L);
 

@@ -30,7 +30,7 @@ public class SensorDataAdapter extends ArrayAdapter<SensorData> {
         TextView tvTemp = (TextView) convertView.findViewById(R.id.tvTemp);
         // TODO: add sensor name to SensorData.
         // Populate the data into the template view using the data object
-        tvRoom.setText(sensorData.getName());
+        tvRoom.setText(sensorData.getSensorId());
         tvTemp.setText(Double.toString(sensorData.getTemp()) + " °C");
         // Return the completed view to render on screen
         return convertView;

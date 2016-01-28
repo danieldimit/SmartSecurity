@@ -1,5 +1,6 @@
 package com.proseminar.smartsecurity;
 
+import android.bluetooth.BluetoothAdapter;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -21,6 +22,8 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.support.v4.app.ActivityCompat.startActivityForResult;
+
 /**
  * Created by Daniel on 24/01/2016.
  */
@@ -38,10 +41,15 @@ public class InfoActivity extends AppCompatActivity {
 
     boolean connected;
 
+    BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+    private final static int REQUEST_ENABLE_BT=1;
+
     // UI Elements
     GridView gridView;
 
     List<SensorData> sDataList;
+
+    Context context = this;
 
     private ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
@@ -56,7 +64,7 @@ public class InfoActivity extends AppCompatActivity {
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to add listener", e);
             }
-            // updateTweetView();
+            updateGridView();
         }
 
         @Override
@@ -113,6 +121,10 @@ public class InfoActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         connected = false;
+        if (!mBluetoothAdapter.isEnabled()) {
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+        }
         initializeInfoUI();
     }
 
@@ -120,7 +132,7 @@ public class InfoActivity extends AppCompatActivity {
         setContentView(R.layout.activity_info_activity);
 
         //Intent intent = new Intent(SensorDataCollectorService.class.getName());
-        Intent intent = new Intent(this, SensorDataCollectorService.class);
+        Intent intent = new Intent(SensorDataCollectorService.class.getName());
         this.startService(intent);
 
         bindService(intent, serviceConnection, 0);
@@ -128,31 +140,7 @@ public class InfoActivity extends AppCompatActivity {
         Log.i(TAG, "Activity created");
 
         gridView = (GridView) findViewById(R.id.gridView1);
-        // Construct the data source
-        ArrayList<SensorData> arrayOfUsers = new ArrayList<SensorData>();
-        // Create the adapter to convert the array to views
-        SensorDataAdapter adapter = new SensorDataAdapter(this, arrayOfUsers);
-        // Attach the adapter to a ListView
-        gridView.setAdapter(adapter);
 
-        /** TODO: NEEDS FIXING NUllpointerexception
-
-        while (connected == false) {
-            try {
-                SensorDataUpdateResult sdur = api.getLatestUpdateResult();
-                sDataList = sdur.getSensorData();
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
-        }
-        // Fill with Dummy items
-        if (!(sDataList == null)) {
-            for (SensorData sd : sDataList) {
-                adapter.add(sd);
-            }
-        }
-
-         */
     }
 
     public void alarmOnOnClick(View v) {
@@ -163,5 +151,31 @@ public class InfoActivity extends AppCompatActivity {
     public void settingsOnClick(View v) {
         Intent i = new Intent(this, SettingsActivity.class);
         startActivity(i);
+    }
+
+    public void overviewOnClick(View v) {
+        updateGridView();
+    }
+
+
+    private void updateGridView() {
+        // Construct the data source
+        ArrayList<SensorData> arrayOfUsers = new ArrayList<SensorData>();
+        // Create the adapter to convert the array to views
+        SensorDataAdapter adapter = new SensorDataAdapter(context, arrayOfUsers);
+        // Attach the adapter to a ListView
+        gridView.setAdapter(adapter);
+        try {
+            SensorDataUpdateResult sdur = api.getLatestUpdateResult();
+            sDataList = sdur.getSensorData();
+            // Fill with Dummy items
+            if (!(sDataList == null)) {
+                for (SensorData sd : sDataList) {
+                    adapter.add(sd);
+                }
+            }
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 }
