@@ -1,8 +1,15 @@
 package com.proseminar.smartsecurity;
 
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -12,26 +19,115 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Daniel on 24/01/2016.
  */
 public class InfoActivity extends AppCompatActivity {
 
+    // Constants
+    static final boolean ON = true;
+    static final boolean OFF = false;
+    static final String KEY = "alarm_status";
+    private static final String TAG = InfoActivity.class.getSimpleName();
+
+    // Recalls the last state - ON or OFF
+    private SharedPreferences mPrefs;
+    private boolean currentStatus;
+
+    boolean connected;
+
+    // UI Elements
     GridView gridView;
 
-    static final String[] numbers = new String[] {
-            "A", "B", "C", "D", "E",
-            "F", "G", "H", "I", "J"};
+    List<SensorData> sDataList;
+
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            Log.i(TAG, "Service connection established");
+
+            // that's how we get the client side of the IPC connection
+            api = SensorDataCollectorApi.Stub.asInterface(service);
+            try {
+                api.addListener(collectorListener);
+                connected = true;
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to add listener", e);
+            }
+            // updateTweetView();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Log.i(TAG, "Service connection closed");
+            connected = false;
+        }
+    };
+
+    private SensorDataCollectorApi api;
+
+    //private Handler handler;
+
+    private SensorDataCollectorListener.Stub collectorListener = new SensorDataCollectorListener.Stub() {
+        @Override
+        public void handleSensorDataUpdated() throws RemoteException {
+            // updateTweetView();
+        }
+    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+
+
+        mPrefs = getSharedPreferences("latest_alarm_status", Context.MODE_PRIVATE);
+        currentStatus = mPrefs.getBoolean(KEY, OFF);
+
+        Log.e(TAG, Boolean.toString(currentStatus));
+        if (currentStatus) {
+            Intent i = new Intent(this, AlarmOnActivity.class);
+            startActivity(i);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        try {
+            api.removeListener(collectorListener);
+            unbindService(serviceConnection);
+        } catch (Throwable t) {
+            // catch any issues, typical for destroy routines
+            // even if we failed to destroy something, we need to continue destroying
+            Log.w(TAG, "Failed to unbind from the service", t);
+        }
+
+        Log.i(TAG, "Activity destroyed");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        connected = false;
+        initializeInfoUI();
+    }
+
+    private void initializeInfoUI() {
         setContentView(R.layout.activity_info_activity);
 
-        gridView = (GridView) findViewById(R.id.gridView1);
+        //Intent intent = new Intent(SensorDataCollectorService.class.getName());
+        Intent intent = new Intent(this, SensorDataCollectorService.class);
+        this.startService(intent);
 
+        bindService(intent, serviceConnection, 0);
+
+        Log.i(TAG, "Activity created");
+
+        gridView = (GridView) findViewById(R.id.gridView1);
         // Construct the data source
         ArrayList<SensorData> arrayOfUsers = new ArrayList<SensorData>();
         // Create the adapter to convert the array to views
@@ -39,26 +135,25 @@ public class InfoActivity extends AppCompatActivity {
         // Attach the adapter to a ListView
         gridView.setAdapter(adapter);
 
-        for (int i=0; i<25; i++) {
-            SensorData newUser = new SensorData("Nathan", 4.2, 3.2, 4.2);
-            adapter.add(newUser);
+        /** TODO: NEEDS FIXING NUllpointerexception
+
+        while (connected == false) {
+            try {
+                SensorDataUpdateResult sdur = api.getLatestUpdateResult();
+                sDataList = sdur.getSensorData();
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
         }
+        // Fill with Dummy items
+        if (!(sDataList == null)) {
+            for (SensorData sd : sDataList) {
+                adapter.add(sd);
+            }
+        }
+
+         */
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     public void alarmOnOnClick(View v) {
         Intent i = new Intent(this, AlarmOnActivity.class);

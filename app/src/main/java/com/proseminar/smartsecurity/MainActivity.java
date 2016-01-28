@@ -47,8 +47,6 @@ public class MainActivity extends AppCompatActivity {
 
     private SensorDataCollectorApi api;
 
-    private TextView tweetView;
-
     //private Handler handler;
 
     private SensorDataCollectorListener.Stub collectorListener = new SensorDataCollectorListener.Stub() {
@@ -68,11 +66,13 @@ public class MainActivity extends AppCompatActivity {
         // Don't delete. Will be used later for the overview activity, when the alarm is off.
         // tweetView = (TextView) findViewById(R.id.tweet_view);
 
-        Intent intent = new Intent(SensorDataCollectorService.class.getName());
+        //Intent intent = new Intent(SensorDataCollectorService.class.getName());
+        Intent intent = new Intent(this, SensorDataCollectorService.class);
 
         // start the service explicitly.
         // otherwise it will only run while the IPC connection is up.
-        startService(intent);
+        //startService(intent);
+        this.startService(intent);
 
         bindService(intent, serviceConnection, 0);
 
@@ -85,15 +85,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
 
-        try {
-            api.removeListener(collectorListener);
-            unbindService(serviceConnection);
-            mBound = false;
-        } catch (Throwable t) {
-            // catch any issues, typical for destroy routines
-            // even if we failed to destroy something, we need to continue destroying
-            Log.w(TAG, "Failed to unbind from the service", t);
-        }
+
 
         Log.i(TAG, "Activity destroyed");
     }
@@ -108,15 +100,11 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Log.w(TAG, "++ UNBIND & STOP ++");
             unbindService(serviceConnection);
-            api.turnServiceOff();
             mBound = false;
         }
     }
 
-    public void onPhoneClick(View view) {
-        Intent i = new Intent(this, AddPhoneActivity.class);
-        startActivity(i);
-    }
+
 
     public void onScanClick(View view) {
         Intent i = new Intent(this, SettingsActivity.class);

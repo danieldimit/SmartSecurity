@@ -9,7 +9,7 @@ interface SensorDataCollectorApi {
 
 	SensorDataUpdateResult getLatestUpdateResult();
 
-	void turnServiceOff();
+	void notifyAlarmStatusChanged(boolean alarmStatus);
 
 	void addListener(SensorDataCollectorListener listener);
 

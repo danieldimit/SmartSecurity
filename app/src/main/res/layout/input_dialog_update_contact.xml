@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#efefef"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Name"
+        android:id="@+id/textView2"
+        android:textSize="25sp"
+        android:textStyle="bold"
+        android:fontFamily="sans-serif-light"/>
+
+    <EditText
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:inputType="text"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:id="@+id/textName"
+        android:textSize="25sp"
+        android:fontFamily="sans-serif-light"/>
+
+    <TextView
+        android:layout_width="178dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Phone"
+        android:id="@+id/textView3"
+        android:textSize="25sp"
+        android:textStyle="bold"
+        android:fontFamily="sans-serif-light"/>
+
+    <EditText
+        android:id="@+id/textPhone"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:inputType="phone"
+        android:textSize="25sp"
+        android:fontFamily="sans-serif-light" />
+
+</LinearLayout>

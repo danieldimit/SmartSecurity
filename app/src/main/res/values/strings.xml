@@ -1,22 +1,20 @@
 <resources>
-    <string name="app_name">SmartSecurity</string>
+    <string name="app_name">SmartAlarm</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="textAlarm">Alarm</string>
     <string name="phoneButton1">Add Phone</string>
     <string name="sensorButton1">Scan for sensors</string>
 
     <string name="title_activity_settings">SettingsActivity</string>
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMY\nCONTENT\nCONTENT\nCONTENT\nCONTENT
-        \nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT
-        \nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT
-        \nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT\nCONTENT
-        \nCONTENT\nCONTENT\nCONTENT\nCONTENT\n10CONTENT</string>
 
-    <string name="contacts">Numbers to notify</string>
+    <string name="contacts">Contacts</string>
     <string name="sensors">Sensors</string>
-    <string name="warning">The alarm will turn on after</string>
-    <string name="seconds">seconds.</string>
+    <string name="alarm_warning_text_top">The alarm will turn on after</string>
+    <string name="alarm_warning_text_bottom">seconds.</string>
+    <string name="alarm_on_text_top">The alarm is</string>
+    <string name="alarm_on_text_middle">ON</string>
+    <string name="alarm_on_text_bottom">You have 30 seconds to turn it off, after it detects you.</string>
     <string name="cancelButton">Cancel</string>
     <string name="turnOffButton">Stop</string>
+    <string name="sensors_in_range">Sensors in range</string>
 </resources>
