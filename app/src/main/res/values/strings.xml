@@ -17,4 +17,6 @@
     <string name="cancelButton">Cancel</string>
     <string name="turnOffButton">Stop</string>
     <string name="sensors_in_range">Sensors in range</string>
+    <string name="ble_not_supported">BLE is not supported by this device!</string>
+    <string name="error_bluetooth_not_supported">BLuetooth is not supported by this device!</string>
 </resources>
