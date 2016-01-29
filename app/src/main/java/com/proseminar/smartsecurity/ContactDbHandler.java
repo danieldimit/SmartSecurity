@@ -6,7 +6,7 @@ import android.database.Cursor;
 import android.content.Context;
 import android.content.ContentValues;
 
-public class DbHandler extends SQLiteOpenHelper{
+public class ContactDbHandler extends SQLiteOpenHelper{
 
     //use if you have only one table
     private static final int DATABASE_VERSION = 1;
@@ -15,7 +15,7 @@ public class DbHandler extends SQLiteOpenHelper{
     public static final String COLUMN_PHONE = "phone";
     public static final String COLUMN_NAME = "name";
 
-    public DbHandler(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
+    public ContactDbHandler(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
         super(context, name, factory, version);
     }
 

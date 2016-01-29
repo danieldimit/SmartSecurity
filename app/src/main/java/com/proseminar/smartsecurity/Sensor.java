@@ -1,14 +1,12 @@
 package com.proseminar.smartsecurity;
 
-import java.lang.reflect.Array;
-import java.security.InvalidParameterException;
 import java.util.ArrayList;
 
 /**
  * Created by Joachim on 26.01.2016.
  */
 public class Sensor {
-	private static int numberOfPastValues = 10;
+	private static int numberOfPastValues = 60;
 	private static int numberOfPredictedValues = 5;
 	private static int weightNewerValues = 3;
 	private static double halfConfCap = 0.2;
@@ -23,10 +21,11 @@ public class Sensor {
 	private int dataCounter;
 
 	public Sensor(String name, String sensorId) {
-		for (String str : sensorNames)
-			if (str.equals(sensorId))
+		for (String str : sensorNames) {
+			if (str.equals(sensorId)) {
 				throw new IllegalArgumentException("The name " + sensorId + " has already been taken.");
-
+			}
+		}
 		this.sensorId = sensorId;
 		this.name = name;
 		temperature = new double[numberOfPastValues];

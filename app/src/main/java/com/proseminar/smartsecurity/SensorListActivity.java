@@ -63,6 +63,7 @@ public class SensorListActivity extends AppCompatActivity {
         listView.setAdapter(adapter);
 
 
+
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override

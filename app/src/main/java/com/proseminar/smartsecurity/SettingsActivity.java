@@ -37,7 +37,7 @@ public class SettingsActivity extends AppCompatActivity {
     public static final String COLUMN_PHONE = "phone";
     public static final String COLUMN_NAME = "name";
 
-    DbHandler myHandle;
+    ContactDbHandler myHandle;
 
     //Sensor variables:
     ImageButton addSensors;
@@ -53,7 +53,7 @@ public class SettingsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_settings);
 
         addPeople = (ImageButton)  findViewById(R.id.button_button_add_new_contact);
-        myHandle = new DbHandler(this, DATABASE_NAME, null, 1);
+        myHandle = new ContactDbHandler(this, DATABASE_NAME, null, 1);
 
         addPeople.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {

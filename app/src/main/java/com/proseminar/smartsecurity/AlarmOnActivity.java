@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.IBinder;
@@ -37,6 +38,8 @@ public class AlarmOnActivity extends AppCompatActivity {
 
     // Count down timers
     private CountDownTimer turnOnTimer;
+
+    Resources res;
 
     private SensorDataCollectorApi api;
 
@@ -86,9 +89,12 @@ public class AlarmOnActivity extends AppCompatActivity {
         }
         initButton();
 
+        res = getResources();
+        final int countDownMiliSeconds = res.getInteger(R.integer.ui_alarm_on_countdown);
+
         if (!currentStatus) {
             // Timer counting down the time until the alarm gets turned on (30 000)
-            turnOnTimer = new CountDownTimer(2000, 1000) {
+            turnOnTimer = new CountDownTimer(countDownMiliSeconds, 1000) {
 
                 public void onTick(long millisUntilFinished) {
                     tvSeconds.setText(Integer.toString((int) (millisUntilFinished / 1000)));

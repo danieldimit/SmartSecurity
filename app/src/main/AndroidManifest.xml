@@ -31,7 +31,6 @@
         </activity>
         <activity android:name=".SettingsActivity" />
         <activity android:name=".AlarmOnActivity" />
-        <activity android:name=".MainActivity" />
         <activity android:name=".SensorListActivity" />
 
 

@@ -1,6 +1,7 @@
 package com.proseminar.smartsecurity;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -17,13 +18,14 @@ public class SensorCollection {
     Context c;
     private Contact[] contact;
     private final String DATABASE_NAME = "contacts.db";
-    private DbHandler myHandle;
+    private ContactDbHandler myHandle;
     private SensorDbHandler mySensorHandle1;
     private boolean notified;
 
     public SensorCollection(Context c) {
+
         this.c = c;
-        myHandle = new DbHandler(c, DATABASE_NAME, null, 1);
+        myHandle = new ContactDbHandler(c, DATABASE_NAME, null, 1);
         mySensorHandle1 = new SensorDbHandler (c, "sensors.db", null, 1);
         notified = false;
         Sensor[] sa = mySensorHandle1.databaseToString();
@@ -47,7 +49,7 @@ public class SensorCollection {
                         double conf = sensor.calcRobberyConfidence();
                         if (alarmIsOn && conf >= 0.5) {
                              if (!notified) {
-                                 Log.e("COLECTION", "++++++++++++++++++++++++++++SMS SENT+++++++++++++++++++++++++");
+                                 Log.e("COLECTION", "++++++++++++++++++++++++++++SMS SENT++++++++++++++++++++++++++++");
                                  // notifySMS();
                                  notified = true;
                              }

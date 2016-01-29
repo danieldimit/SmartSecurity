@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -21,6 +22,8 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static android.support.v4.app.ActivityCompat.startActivityForResult;
 
@@ -34,6 +37,8 @@ public class InfoActivity extends AppCompatActivity {
     static final boolean OFF = false;
     static final String KEY = "alarm_status";
     private static final String TAG = InfoActivity.class.getSimpleName();
+
+    Resources res;
 
     // Recalls the last state - ON or OFF
     private SharedPreferences mPrefs;
@@ -50,6 +55,8 @@ public class InfoActivity extends AppCompatActivity {
     List<SensorData> sDataList;
 
     Context context = this;
+
+    Thread t;
 
     private ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
@@ -85,11 +92,17 @@ public class InfoActivity extends AppCompatActivity {
         }
     };
 
+    private Timer timer;
+    private TimerTask updateInfo = new TimerTask() {
+        @Override
+        public void run() {
+            updateGridView();
+        }
+    };
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-
 
         mPrefs = getSharedPreferences("latest_alarm_status", Context.MODE_PRIVATE);
         currentStatus = mPrefs.getBoolean(KEY, OFF);
@@ -126,6 +139,34 @@ public class InfoActivity extends AppCompatActivity {
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         }
         initializeInfoUI();
+
+        res = getResources();
+        final int updateSeconds = res.getInteger(R.integer.ui_update_info_page);
+
+        t = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    while (!isInterrupted()) {
+                        Thread.sleep(updateSeconds);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                updateGridView();
+                            }
+                        });
+                    }
+                } catch (InterruptedException e) {
+                }
+            }
+        };
+        t.start();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        t.interrupt();
     }
 
     private void initializeInfoUI() {
@@ -188,4 +229,6 @@ public class InfoActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
+
 }
