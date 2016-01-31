@@ -127,7 +127,9 @@ public class AlarmOnActivity extends AppCompatActivity {
         if (currentapiVersion >= android.os.Build.VERSION_CODES.LOLLIPOP){
             // Do something for lollipop and above versions
 
-            intent = new Intent(this, SensorDataCollectorService.class);
+            intent = new Intent(SensorDataCollectorService.class.getCanonicalName());
+            // This is the key line that fixed everything for me
+            intent.setPackage("com.proseminar.smartsecurity");
         } else{
             // do something for phones running an SDK before lollipop
 
@@ -136,7 +138,7 @@ public class AlarmOnActivity extends AppCompatActivity {
         // start the service explicitly.
         // otherwise it will only run while the IPC connection is up.
         this.startService(intent);
-        bindService(intent, serviceConnection, 0);
+        this.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override

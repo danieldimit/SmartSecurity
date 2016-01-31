@@ -30,37 +30,43 @@ public final class SensorDataUpdater {
 		mySensorHandler = new SensorDbHandler(x, "doesn't matter", null ,1);
 
 		sList = mySensorHandler.databaseToString();
-
-		// Convert to Sensor Data
-		if (sList != null) {
-			for (Sensor s: sList) {
-				sd = new SensorData(s.getName(), s.getSensorId(), genTemp(), 0 ,0);
-				result.addSensorData(sd);
-			}
-		}
+		return null;
 
 
-		// Example for Data from one sensor
+		/**
+		 * // Convert to Sensor Data
+		 if (sList != null) {
+		 for (Sensor s: sList) {
+		 sd = new SensorData(s.getName(), s.getSensorId(), genTemp(), 0 ,0);
+		 result.addSensorData(sd);
+		 }
+		 }
 
-		String id = "asdf";
-		String name = "ivan";
-		double temp = 24.1;
-		double hum = 29.4;
-		double acc = 1.2;
-		SensorData exampleSD = new SensorData(name, id, temp, hum, acc);
 
-		// End of example
+		 // Example for Data from one sensor
 
-		return result;
+		 String id = "asdf";
+		 String name = "ivan";
+		 double temp = 24.1;
+		 double hum = 29.4;
+		 double acc = 1.2;
+		 SensorData exampleSD = new SensorData(name, id, temp, hum, acc);
+
+		 // End of example
+
+		 return result;
+		 }
+
+		 private int genTemp() {
+		 int min = 23;
+		 int max = 25;
+		 int value = max - min;
+
+		 Random r = new Random();
+		 int i1 = r.nextInt(value) + min;
+		 return i1;
+		 }
+		 */
 	}
 
-	private int genTemp() {
-		int min = -15;
-		int max = 20;
-		int value = max - min;
-
-		Random r = new Random();
-		int i1 = r.nextInt(value) + min;
-		return i1;
-	}
 }
