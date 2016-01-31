@@ -12,6 +12,8 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 /**
@@ -145,10 +147,10 @@ public class SettingsActivity extends AppCompatActivity {
                 }
                 myAwesomeNameViewSensors[i].setId(i+500);
                 updaterButtonSensors[i] = (ImageButton) findViewById(R.id.button_edit_sensors);
-                updaterButtonSensors[i].setId(i+600);
+                updaterButtonSensors[i].setId(i + 600);
                 updaterButtonSensors[i].setOnClickListener(sensorUpdater);
                 destoyerButtonSensors[i] = (ImageButton) findViewById(R.id.button_delete_sensors);
-                destoyerButtonSensors[i].setId(i+700);
+                destoyerButtonSensors[i].setId(i + 700);
                 destoyerButtonSensors[i].setOnClickListener(sensorDestroyer);
             }
         }
