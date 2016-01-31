@@ -1,11 +1,13 @@
 package com.proseminar.smartsecurity;
 
 import java.util.ArrayList;
+import java.util.Observable;
+import java.util.Observer;
 
 /**
  * Created by Joachim on 26.01.2016.
  */
-public class Sensor {
+public class Sensor implements Observer {
 	private static int numberOfPastValues = 60;
 	private static int numberOfPredictedValues = 5;
 	private static int weightNewerValues = 3;
@@ -31,6 +33,8 @@ public class Sensor {
 		temperature = new double[numberOfPastValues];
 		valIndex = 0;
 		dataCounter = 0;
+		SyncManager manager = SyncManager.getInstance();
+		manager.setObserver(this);
 	}
 
 	public boolean idFits(SensorData sd) {
@@ -129,4 +133,8 @@ public class Sensor {
 	public String getName() { return name; }
 
 	public void setName(String name) { this.name = name; }
+
+	public void update(Observable obs, Object data) {
+		updateSensorData((SensorData) data);
+	}
 }

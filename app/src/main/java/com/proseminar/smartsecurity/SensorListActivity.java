@@ -46,6 +46,7 @@ public class SensorListActivity extends AppCompatActivity {
     //DEFINING A STRING ADAPTER WHICH WILL HANDLE THE DATA OF THE LISTVIEW
     ArrayAdapter<String> adapter;
     private HashMap<String, BluetoothDevice> deviceList = new HashMap<String, BluetoothDevice>();
+    private SyncManager manager = SyncManager.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,7 +84,8 @@ public class SensorListActivity extends AppCompatActivity {
         System.out.println("Created!");
         checkPermissions();
         initializeBT();
-        mBLEConnector = new BluetoothLeConnector(this, btAdapter);
+        mBLEConnector = new BluetoothLeConnector(this);
+        manager.setBluetoothLeConnector(mBLEConnector);
         startScan(10000);
     }
 
@@ -154,6 +156,11 @@ public class SensorListActivity extends AppCompatActivity {
             }
         }
     }
+
+    public void test() {
+
+    }
+
     private void setSensorName(final String macAdress) {
         // get prompts.xml view
         LayoutInflater layoutInflater = LayoutInflater.from(SensorListActivity.this);

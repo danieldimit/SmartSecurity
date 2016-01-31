@@ -26,22 +26,19 @@ import android.widget.Toast;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Observable;
 import java.util.UUID;
 
 /**
  * Created by christian on 28.01.16.
  */
-public class BluetoothLeConnector {
+public class BluetoothLeConnector extends Observable {
 
-    private int SCAN_PERIOD = 10000;
-    private Handler mHandler;
-    private BluetoothAdapter btAdapter;
     private BluetoothGatt bluetoothGatt;
     private Context context;
     private List<BluetoothGattService> services = new LinkedList<>();
-    private List<BluetoothGattCharacteristic> characteristics = new LinkedList<>();
     private LinkedList<Integer> messageQueue = new LinkedList<>(Arrays.asList(10, 11, 20, 21));
-    private ArrayAdapter<String> arrayAdapter;
+
 
     private final UUID UUID_HUM_SERV = UUID.fromString("f000aa20-0451-4000-b000-000000000000");
     private final UUID UUID_HUM_CONF = UUID.fromString("f000aa22-0451-4000-b000-000000000000");// 0: disable, 1: enable
@@ -53,6 +50,12 @@ public class BluetoothLeConnector {
     private final UUID UUID_ACC_PERI = UUID.fromString("f000aa13-0451-4000-b000-000000000000"); // Period in tens of ms
 
 
+    private double humidity = 0;
+    private double temperature = 0;
+    private double accX = 0;
+    private double accY = 0;
+    private double accZ = 0;
+    private double accMax = 0;
 
 
 
@@ -118,10 +121,8 @@ public class BluetoothLeConnector {
     };
 
 
-    BluetoothLeConnector(Context context, BluetoothAdapter adapter) {
-        this.btAdapter = adapter;
+    BluetoothLeConnector(Context context) {
         this.context = context;
-        mHandler = new Handler();
         //startScan();
     }
 
@@ -185,10 +186,10 @@ public class BluetoothLeConnector {
         // Humidity
         int hum = (upperHumByte << 8) + lowerHumByte;
         hum=hum-(hum%4);
-        float humidity = (-6f) + 125f * (hum / 65535f);
+        humidity = (-6f) + 125f * (hum / 65535f);
         // Temperature
         int temp = (upperTempByte << 8) + lowerTempByte;
-        float temperature = -46.85f + (175.72f/65536f) * (float)temp;
+        temperature = -46.85f + (175.72f/65536f) * (float)temp;
 //        System.out.println("Humidity: " + humidity);
 //        System.out.println("Temperature: " + temperature);
     }
@@ -212,10 +213,19 @@ public class BluetoothLeConnector {
      *  32 = 2g
      * */
 
-        Integer x = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT8, 0);
-        Integer y = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT8, 1);
-        Integer z = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT8, 2) * -1;
-        System.out.println("Acc X: " + x + " Y: " + x + " Z: " + x);
+        accX = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT8, 0);
+        accY = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT8, 1);
+        accZ = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT8, 2) * -1;
+        accMax = Math.max(Math.max(Math.abs(accX), Math.abs(accY)), Math.abs(accZ));
+        System.out.println("Acc X: " + accX + " Y: " + accY + " Z: " + accZ);
+        notifyObservers(getSensorData());
     }
+
+    public SensorData getSensorData() {
+        BluetoothDevice dev = bluetoothGatt.getDevice();
+        SensorData sens = new SensorData(dev.getName(), dev.getAddress(), temperature, humidity, accMax, accX, accY, accZ);
+        return sens;
+    }
+
 
 }

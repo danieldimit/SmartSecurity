@@ -25,6 +25,9 @@ public final class SensorData implements Parcelable {
 	private double temp;
 	private double humidity;
 	private double accelometer;
+	private double accX;
+	private double accY;
+	private double accZ;
 	private String name;
 
 	public SensorData(String name, String sensorId, double temp, double humidity, double accelometer) {
@@ -33,6 +36,17 @@ public final class SensorData implements Parcelable {
 		this.temp = temp;
 		this.humidity = humidity;
 		this.accelometer = accelometer;
+	}
+
+	public SensorData(String name, String sensorId, double temp, double humidity, double accelometer, double accX, double accY, double accZ) {
+		this.name = name;
+		this.sensorId = sensorId;
+		this.temp = temp;
+		this.humidity = humidity;
+		this.accelometer = accelometer;
+		this.accX = accX;
+		this.accY = accY;
+		this.accZ = accZ;
 	}
 	
 	private SensorData(Parcel source) {
@@ -69,6 +83,12 @@ public final class SensorData implements Parcelable {
 	public double getAccelometer() {
 		return accelometer;
 	}
+
+	public double getAccX() { return accX; }
+
+	public double getAccY() { return accY; }
+
+	public double getAccZ() { return accZ; }
 
 	@Override
 	public int describeContents() {
