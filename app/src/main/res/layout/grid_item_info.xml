@@ -1,48 +1,113 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="120dp">
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
 
 
-    <LinearLayout android:id="@+id/container"
-        android:layout_width="fill_parent"
+    <LinearLayout
+        android:orientation="horizontal"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:layout_width="match_parent">
 
         <TextView
             android:id="@+id/tvRoom"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
-            android:textSize="30sp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginStart="15dp"
+            android:textSize="37sp"
             android:textColor="#333333"
-            android:paddingLeft="5dp"
-            android:textStyle="bold"
             android:fontFamily="sans-serif-light"/>
 
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            />
+
         <ImageView
-            android:id="@+id/grid_item_image"
-            android:layout_width="wrap_content"
+            android:id="@+id/image_battery"
+            android:layout_width="50dp"
             android:layout_height="match_parent"
             android:adjustViewBounds="true"
+            android:layout_marginRight="5dp"
+            android:layout_marginEnd="5dp"
             android:padding="8dp"
             android:scaleType="fitCenter"
             android:src="@drawable/battery167" >
         </ImageView>
 
-    </LinearLayout>
 
-    <TextView
-        android:id="@+id/tvTemp"
-        android:layout_width="wrap_content"
+
+        </LinearLayout>
+
+
+
+
+
+
+    <LinearLayout
+        android:orientation="horizontal"
         android:layout_height="wrap_content"
-        android:paddingLeft="5dp"
-        android:gravity="center_horizontal"
-        android:text="eample"
-        android:textSize="45sp"
-        android:textColor="#333333"
-        android:textStyle="bold"
-        android:fontFamily="sans-serif-light"
-        android:layout_below="@+id/container" />
+        android:layout_width="match_parent">
 
-</RelativeLayout>
+        <ImageView
+            android:id="@+id/image_temp"
+            android:layout_width="50dp"
+            android:layout_height="match_parent"
+            android:adjustViewBounds="true"
+            android:layout_alignParentEnd="true"
+            android:padding="4dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/temp" >
+        </ImageView>
+
+        <TextView
+            android:id="@+id/tvTemp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:textSize="42sp"
+            android:textColor="#333333"
+            android:fontFamily="sans-serif-light" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            />
+
+
+        <ImageView
+            android:id="@+id/image_humid"
+            android:layout_width="52dp"
+            android:layout_height="match_parent"
+            android:adjustViewBounds="true"
+            android:padding="6dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/humid" >
+        </ImageView>
+
+        <TextView
+            android:id="@+id/tvHumid"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="5dp"
+            android:layout_marginEnd="5dp"
+            android:textSize="42sp"
+            android:textColor="#333333"
+            android:fontFamily="sans-serif-light" />
+
+        </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="#333333"
+        />
+
+
+
+</LinearLayout>

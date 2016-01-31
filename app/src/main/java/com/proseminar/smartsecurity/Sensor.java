@@ -1,5 +1,7 @@
 package com.proseminar.smartsecurity;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
@@ -7,7 +9,7 @@ import java.util.Observer;
 /**
  * Created by Joachim on 26.01.2016.
  */
-public class Sensor implements Observer {
+public class Sensor {
 	private static int numberOfPastValues = 60;
 	private static int numberOfPredictedValues = 5;
 	private static int weightNewerValues = 3;
@@ -15,30 +17,32 @@ public class Sensor implements Observer {
 
 	private static ArrayList<String> sensorNames = new ArrayList<String>();
 
-	private String sensorId;
+	private String macAddress;
 	private String name;
 	private double[] temperature;
+
+
+
 	private double[] accelerometer;
 	private int valIndex;
 	private int dataCounter;
 
-	public Sensor(String name, String sensorId) {
+	public Sensor(String name, String macAddress) {
 		for (String str : sensorNames) {
-			if (str.equals(sensorId)) {
-				throw new IllegalArgumentException("The name " + sensorId + " has already been taken.");
+			if (str.equals(macAddress)) {
+				throw new IllegalArgumentException("The device with MAC-Address:  "
+						+ macAddress + ", is already paired.");
 			}
 		}
-		this.sensorId = sensorId;
+		this.macAddress = macAddress;
 		this.name = name;
 		temperature = new double[numberOfPastValues];
 		valIndex = 0;
 		dataCounter = 0;
-		SyncManager manager = SyncManager.getInstance();
-		manager.setObserver(this);
 	}
 
 	public boolean idFits(SensorData sd) {
-		return sensorId.equals(sd.getSensorId());
+		return macAddress.equals(sd.getMacAddress());
 	}
 
 	public void resetData() {
@@ -51,7 +55,6 @@ public class Sensor implements Observer {
 	// adds the newest value to the array and returns true if there's enough data collected to start identifying possible threats
 	public boolean updateSensorData(SensorData sd) {
 		double newTemp = sd.getTemp();
-
 		temperature[valIndex] = newTemp;
 		valIndex++;
 		if (valIndex == numberOfPastValues)
@@ -128,13 +131,18 @@ public class Sensor implements Observer {
 		return confidence;
 	}
 
-	public String getSensorId() { return sensorId; }
+	public String getSensorId() { return macAddress; }
 
 	public String getName() { return name; }
 
 	public void setName(String name) { this.name = name; }
 
-	public void update(Observable obs, Object data) {
-		updateSensorData((SensorData) data);
+	public double[] getTemperature() {
+		return temperature;
 	}
+
+	public double[] getAccelerometer() {
+		return accelerometer;
+	}
+
 }

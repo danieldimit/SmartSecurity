@@ -1,15 +1,20 @@
 package com.proseminar.smartsecurity;
 
+import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -47,12 +52,9 @@ public class InfoActivity extends AppCompatActivity {
     boolean connected;
 
     BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-    private final static int REQUEST_ENABLE_BT=1;
 
     // UI Elements
     GridView gridView;
-
-    List<SensorData> sDataList;
 
     Context context = this;
 
@@ -100,12 +102,27 @@ public class InfoActivity extends AppCompatActivity {
         }
     };
 
+    private BluetoothLeConnector mBLEConnector;
+    private BluetoothAdapter btAdapter;
+    private static final int REQUEST_ENABLE_BT = 1;
+    private int MY_PERMISSIONS_REQUEST_ACCESS_LOCATION = 2;
+    private SyncManager manager = SyncManager.getInstance();
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         mPrefs = getSharedPreferences("latest_alarm_status", Context.MODE_PRIVATE);
         currentStatus = mPrefs.getBoolean(KEY, OFF);
+
+        System.out.println("Created!");
+
+        int permissionCheck = ContextCompat.checkSelfPermission(this,
+                Manifest.permission.SEND_SMS);
+        System.out.print(permissionCheck);
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.SEND_SMS},
+                10);
 
         Log.e(TAG, Boolean.toString(currentStatus));
         if (currentStatus) {
@@ -190,7 +207,7 @@ public class InfoActivity extends AppCompatActivity {
         }
         this.startService(intent);
 
-        this.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
+        this.bindService(intent, serviceConnection, BIND_AUTO_CREATE);
 
         Log.i(TAG, "Activity created");
 
@@ -222,11 +239,13 @@ public class InfoActivity extends AppCompatActivity {
         gridView.setAdapter(adapter);
         if (api != null) {
             try {
+                List<SensorData> sDataList;
                 SensorDataUpdateResult sdur = api.getLatestUpdateResult();
                 sDataList = sdur.getSensorData();
                 // Fill with Dummy items
-                if (!(sDataList == null)) {
+                if (sDataList != null) {
                     for (SensorData sd : sDataList) {
+                        Log.e(TAG, sd.getName() + "  " + sd.getTemp() + "  " + sd.getMacAddress());
                         adapter.add(sd);
                     }
                 }
@@ -235,6 +254,5 @@ public class InfoActivity extends AppCompatActivity {
             }
         }
     }
-
 
 }

@@ -1,7 +1,6 @@
 package com.proseminar.smartsecurity;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -21,6 +20,7 @@ public class SensorCollection {
     private ContactDbHandler myHandle;
     private SensorDbHandler mySensorHandle1;
     private boolean notified;
+    private static final String TAG = SensorCollection.class.getSimpleName();
 
     public SensorCollection(Context c) {
 
@@ -47,10 +47,10 @@ public class SensorCollection {
                 if (sensor.idFits(sd)) {
                     if (sensor.updateSensorData(sd)) {
                         double conf = sensor.calcRobberyConfidence();
-                        if (alarmIsOn && conf >= 0.5) {
+                        if (alarmIsOn && conf >= 0.8) {
                              if (!notified) {
-                                 Log.e("COLECTION", "++++++++++++++++++++++++++++SMS SENT++++++++++++++++++++++++++++");
-                                 // notifySMS();
+                                 Log.e(TAG, "++++++++++++++++++++++++ SMS SENT ++++++++++++++++++++++++");
+                                 // notifySMS(sensor.getName());
                                  notified = true;
                              }
                         }
@@ -61,11 +61,11 @@ public class SensorCollection {
         }
     }
 
-    private void notifySMS() {
+    private void notifySMS(String room) {
         contact = myHandle.databaseToString();
         if (!(contact == null)) {
             for (Contact cont: contact) {
-                Sms.sendSMS(cont.getNumber(), "SmartSecurity detected a possible threat ");
+                Sms.sendSMS(cont.getNumber(), "SmartSecurity detected a possible threat in the " + room + ".");
             }
         }
 
@@ -77,8 +77,15 @@ public class SensorCollection {
         }
     }
 
-    public void removeSensor(String sensorId) {
-        //
+    public static void removeSensor (String sensorId) {
+        if (sensors != null) {
+            for (Sensor s:sensors) {
+                if (s.getSensorId().equals(sensorId)) {
+                    sensors.remove(s);
+                    break;
+                }
+            }
+        }
     }
 
     public void reset() {

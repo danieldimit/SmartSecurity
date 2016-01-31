@@ -1,19 +1,22 @@
 package com.proseminar.smartsecurity;
 
 import android.app.AlertDialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 
 /**
@@ -22,9 +25,11 @@ import java.util.ArrayList;
  */
 public class SettingsActivity extends AppCompatActivity {
 
+    private static final String TAG = SettingsActivity.class.getSimpleName();
 
     ArrayList<Contact> arrayOfUsers;
     ImageButton addPeople;
+
     //make dynamic array if i give a fuck
     ImageButton[] updaterButton = new ImageButton[100];
     TextView[] myAwesomeNameView = new TextView[100];
@@ -39,7 +44,7 @@ public class SettingsActivity extends AppCompatActivity {
     public static final String COLUMN_PHONE = "phone";
     public static final String COLUMN_NAME = "name";
 
-    ContactDbHandler myHandle;
+    ContactDbHandler contactsHandle;
 
     //Sensor variables:
     ImageButton addSensors;
@@ -48,6 +53,34 @@ public class SettingsActivity extends AppCompatActivity {
     ImageButton[] destoyerButtonSensors = new ImageButton[100];
     SensorDbHandler mySensorHandler;
 
+    private SensorDataCollectorApi api;
+
+    private SensorDataCollectorListener.Stub collectorListener = new SensorDataCollectorListener.Stub() {
+        @Override
+        public void handleSensorDataUpdated() throws RemoteException {
+        }
+    };
+
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            Log.i(TAG, "Service connection established");
+
+            // that's how we get the client side of the IPC connection
+            api = SensorDataCollectorApi.Stub.asInterface(service);
+            try {
+                api.addListener(collectorListener);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to add listener", e);
+            }
+            // updateTweetView();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Log.i(TAG, "Service connection closed");
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +88,7 @@ public class SettingsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_settings);
 
         addPeople = (ImageButton)  findViewById(R.id.button_button_add_new_contact);
-        myHandle = new ContactDbHandler(this, DATABASE_NAME, null, 1);
+        contactsHandle = new ContactDbHandler(this, DATABASE_NAME, null, 1);
 
         addPeople.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -79,7 +112,7 @@ public class SettingsActivity extends AppCompatActivity {
                                     Contact contact = new Contact(input1.getEditableText().toString(), input2.getEditableText().toString());
                                     //contact.setName(input1.getEditableText().toString());
                                     //contact.setNumber(input2.getEditableText().toString());
-                                    myHandle.addContact(contact);
+                                    contactsHandle.addContact(contact);
                                     Intent intent = getIntent();
                                     finish();
                                     startActivity(intent);
@@ -103,7 +136,7 @@ public class SettingsActivity extends AppCompatActivity {
 
         LinearLayout contactslist = (LinearLayout) findViewById(R.id.list_contacts);
         ArrayList<LinearLayout> contactsReadFromFile = new ArrayList<>();
-        Contact[] contacts = myHandle.databaseToString();
+        Contact[] contacts = contactsHandle.databaseToString();
 
         if (contacts != null) {
                 for (int i = 0; i < contacts.length; i++) {
@@ -156,7 +189,41 @@ public class SettingsActivity extends AppCompatActivity {
         }
     }
 
-    View.OnClickListener clickListener = new View.OnClickListener() {
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Intent intent;
+        int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+        if (currentapiVersion >= android.os.Build.VERSION_CODES.LOLLIPOP){
+            // Do something for lollipop and above versions
+
+            intent = new Intent(SensorDataCollectorService.class.getCanonicalName());
+            // This is the key line that fixed everything for me
+            intent.setPackage("com.proseminar.smartsecurity");
+        } else{
+            // do something for phones running an SDK before lollipop
+
+            intent = new Intent(SensorDataCollectorService.class.getName());
+        }
+        // start the service explicitly.
+        // otherwise it will only run while the IPC connection is up.
+        this.startService(intent);
+        this.bindService(intent, serviceConnection, BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        try {
+            api.removeListener(collectorListener);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+        unbindService(serviceConnection);
+    }
+
+    // Edit contact info button and pop-up.
+    public View.OnClickListener clickListener = new View.OnClickListener() {
         public void onClick(View v) {
             int number = 0;
             for (int i = 0; i<100; i++){
@@ -186,9 +253,7 @@ public class SettingsActivity extends AppCompatActivity {
                             } else {
                                 Contact contactHolderOld = new Contact(myAwesomeNameView[number1].getText().toString(), myAwesomePhoneView[number1].getText().toString());
                                 Contact contactHolderNew = new Contact(name.getEditableText().toString(), phone.getEditableText().toString());
-                                //contact.setName(input1.getEditableText().toString());
-                                //contact.setNumber(input2.getEditableText().toString());
-                                myHandle.updateRow(contactHolderOld, contactHolderNew);
+                                contactsHandle.updateRow(contactHolderOld, contactHolderNew);
                                 Intent intent = getIntent();
                                 finish();
                                 startActivity(intent);
@@ -207,7 +272,7 @@ public class SettingsActivity extends AppCompatActivity {
         }
     };
 
-    //method to delete entry
+    // Delete contact from contacts - button and pop-up.
     View.OnClickListener clickDestroyer = new View.OnClickListener() {
         public void onClick(View v) {
             int position =0;
@@ -229,7 +294,7 @@ public class SettingsActivity extends AppCompatActivity {
                     .setPositiveButton("Yes",new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog,int id) {
                             Contact contactHolder = new Contact((String)myAwesomeNameView[i].getText(), (String)myAwesomePhoneView[i].getText());
-                            myHandle.deleteContact(contactHolder);
+                            contactsHandle.deleteContact(contactHolder);
                             Intent intent = getIntent();
                             finish();
                             startActivity(intent);
@@ -249,6 +314,7 @@ public class SettingsActivity extends AppCompatActivity {
         }
     };
 
+    // Check for empty fields.
     public void emptyFields(){
         AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
                 context);
@@ -275,6 +341,7 @@ public class SettingsActivity extends AppCompatActivity {
         alertDialog.show();
     }
 
+    // Edit sensor name button and pop-up.
     View.OnClickListener sensorUpdater = new View.OnClickListener() {
         public void onClick(View v) {
             int number = 0;
@@ -322,7 +389,7 @@ public class SettingsActivity extends AppCompatActivity {
         }
     };
 
-    //method to delete entry
+    // Remove sensor button and pop-up.
     View.OnClickListener sensorDestroyer = new View.OnClickListener() {
         public void onClick(View v) {
             int position =0;
@@ -336,7 +403,7 @@ public class SettingsActivity extends AppCompatActivity {
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
                     context);
             // set title
-            alertDialogBuilder.setTitle("Delete Contact");
+            alertDialogBuilder.setTitle("Remove sensor");
             // set dialog message
             alertDialogBuilder
                     .setMessage("Click yes to delete!")
@@ -346,6 +413,12 @@ public class SettingsActivity extends AppCompatActivity {
                             Sensor sensorHolder = new Sensor(myAwesomeNameViewSensors[i].getText().toString(), null);
                             mySensorHandler.deleteSensor(sensorHolder);
                             Intent intent = getIntent();
+                            try {
+                                api.removeBluetoothConnection(sensorHolder.getSensorId());
+                            } catch (RemoteException e) {
+                                e.printStackTrace();
+                            }
+                            SensorCollection.removeSensor(sensorHolder.getSensorId());
                             finish();
                             startActivity(intent);
                         }
@@ -374,6 +447,4 @@ public class SettingsActivity extends AppCompatActivity {
         Intent i = new Intent(this, InfoActivity.class);
         startActivity(i);
     }
-
-
 }

@@ -25,7 +25,6 @@
             android:text="@string/alarm_on_text_top"
             android:textSize="50sp"
             android:textColor="#efefef"
-            android:textStyle="bold"
             android:fontFamily="sans-serif-thin"/>
 
 
@@ -36,9 +35,9 @@
             android:layout_gravity="center"
             android:textAlignment="center"
             android:text="@string/alarm_on_text_middle"
+            android:textStyle="bold"
             android:textSize="150sp"
             android:textColor="#00ccd6"
-            android:textStyle="bold"
             android:fontFamily="sans-serif-thin"/>
 
         <TextView
@@ -54,7 +53,6 @@
             android:text="@string/alarm_on_text_bottom"
             android:textSize="35sp"
             android:textColor="#efefef"
-            android:textStyle="bold"
             android:fontFamily="sans-serif-thin"/>
 
 
@@ -81,7 +79,6 @@
         android:text="@string/turnOffButton"
         android:background="#00ccd6"
         android:textSize="50sp"
-        android:textStyle="bold"
         android:textColor="#333333"
         android:fontFamily="sans-serif-light" />
 

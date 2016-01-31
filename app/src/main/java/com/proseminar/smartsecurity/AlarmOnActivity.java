@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -79,7 +78,6 @@ public class AlarmOnActivity extends AppCompatActivity {
         currentStatus = mPrefs.getBoolean(KEY, OFF);
         updater = mPrefs.edit();
 
-        Log.e(TAG, "+++++++++++++++ ON CREATE");
         // Set different layouts depending on the status of the alarm.
         if (currentStatus) {
             setContentView(R.layout.activity_alarm_on);
@@ -98,7 +96,6 @@ public class AlarmOnActivity extends AppCompatActivity {
 
                 public void onTick(long millisUntilFinished) {
                     tvSeconds.setText(Integer.toString((int) (millisUntilFinished / 1000)));
-                    Log.e("STOP", "click");
                 }
 
                 // The timer is over the alarm turns on.
@@ -153,7 +150,6 @@ public class AlarmOnActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.e(TAG, "+++++++++++++++DSTRY");
         if (!(turnOnTimer == null)) {
             turnOnTimer.cancel();
         }

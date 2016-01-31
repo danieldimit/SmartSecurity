@@ -2,19 +2,23 @@ package com.proseminar.smartsecurity;
 
 import android.Manifest;
 import android.app.AlertDialog;
-import android.app.ListActivity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -25,12 +29,13 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 
 /**
  * Created by Daniel on 27/01/2016.
  */
 public class SensorListActivity extends AppCompatActivity {
+
+    private static final String TAG = SensorListActivity.class.getSimpleName();
 
     SensorDbHandler mySensorHandle;
     final Context context = this;
@@ -47,6 +52,35 @@ public class SensorListActivity extends AppCompatActivity {
     ArrayAdapter<String> adapter;
     private HashMap<String, BluetoothDevice> deviceList = new HashMap<String, BluetoothDevice>();
     private SyncManager manager = SyncManager.getInstance();
+
+    private SensorDataCollectorApi api;
+
+    private SensorDataCollectorListener.Stub collectorListener = new SensorDataCollectorListener.Stub() {
+        @Override
+        public void handleSensorDataUpdated() throws RemoteException {
+        }
+    };
+
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            Log.i(TAG, "Service connection established");
+
+            // that's how we get the client side of the IPC connection
+            api = SensorDataCollectorApi.Stub.asInterface(service);
+            try {
+                api.addListener(collectorListener);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to add listener", e);
+            }
+            // updateTweetView();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            Log.i(TAG, "Service connection closed");
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,10 +106,10 @@ public class SensorListActivity extends AppCompatActivity {
                                     int position, long id) {
                 String selectedFromList = (String) (listView.getItemAtPosition(position));
                 BluetoothDevice device = deviceList.get(selectedFromList);
-                String sensor_name = device.getName();
-                setSensorName(sensor_name);
+                String sensor_mac = device.getAddress();
+                setSensorName(sensor_mac);
                 stopScan();
-                mBLEConnector.connectTo(device);
+                // mBLEConnector.connectTo(device);
             }
 
         });
@@ -84,8 +118,8 @@ public class SensorListActivity extends AppCompatActivity {
         System.out.println("Created!");
         checkPermissions();
         initializeBT();
-        mBLEConnector = new BluetoothLeConnector(this);
-        manager.setBluetoothLeConnector(mBLEConnector);
+        // mBLEConnector = manager.getConnector();
+        //manager.setBluetoothLeConnector(mBLEConnector);
         startScan(10000);
     }
 
@@ -157,9 +191,6 @@ public class SensorListActivity extends AppCompatActivity {
         }
     }
 
-    public void test() {
-
-    }
 
     private void setSensorName(final String macAdress) {
         // get prompts.xml view
@@ -179,6 +210,11 @@ public class SensorListActivity extends AppCompatActivity {
                         } else {
                             Sensor sensor = new Sensor(name.getText().toString(), macAdress);
                             mySensorHandle.addSensors(sensor);
+                            try {
+                                api.addBluetoothConnection(macAdress);
+                            } catch (RemoteException e) {
+                                e.printStackTrace();
+                            }
                             Intent i = new Intent(SensorListActivity.this, SettingsActivity.class);
                             SensorCollection.addSensor(sensor);
                             finish();
@@ -223,5 +259,39 @@ public class SensorListActivity extends AppCompatActivity {
 
         // show it
         alertDialog.show();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Intent intent;
+        int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+        if (currentapiVersion >= android.os.Build.VERSION_CODES.LOLLIPOP){
+            // Do something for lollipop and above versions
+
+            intent = new Intent(SensorDataCollectorService.class.getCanonicalName());
+            // This is the key line that fixed everything for me
+            intent.setPackage("com.proseminar.smartsecurity");
+        } else{
+            // do something for phones running an SDK before lollipop
+
+            intent = new Intent(SensorDataCollectorService.class.getName());
+        }
+        // start the service explicitly.
+        // otherwise it will only run while the IPC connection is up.
+        this.startService(intent);
+        this.bindService(intent, serviceConnection, BIND_AUTO_CREATE);
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        try {
+            api.removeListener(collectorListener);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
+        unbindService(serviceConnection);
     }
 }

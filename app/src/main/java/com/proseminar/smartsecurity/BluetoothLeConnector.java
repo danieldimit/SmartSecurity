@@ -1,6 +1,5 @@
 package com.proseminar.smartsecurity;
 
-import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -8,20 +7,8 @@ import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
-import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.content.pm.PackageManager;
-import android.os.Handler;
-import android.os.IBinder;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
-import android.util.Log;
-import android.widget.ArrayAdapter;
-import android.widget.Toast;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -36,6 +23,7 @@ public class BluetoothLeConnector extends Observable {
 
     private BluetoothGatt bluetoothGatt;
     private Context context;
+    private BluetoothAdapter adapter;
     private List<BluetoothGattService> services = new LinkedList<>();
     private LinkedList<Integer> messageQueue = new LinkedList<>(Arrays.asList(10, 11, 20, 21));
 
@@ -56,9 +44,6 @@ public class BluetoothLeConnector extends Observable {
     private double accY = 0;
     private double accZ = 0;
     private double accMax = 0;
-
-
-
 
 
     private final BluetoothGattCallback btleGattCallback = new BluetoothGattCallback() {
@@ -96,6 +81,7 @@ public class BluetoothLeConnector extends Observable {
             // this will get called when a device connects or disconnects
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 System.out.println("Fick ja!");
+                messageQueue = new LinkedList<>(Arrays.asList(10, 11, 20, 21));
                 gatt.discoverServices();
             } else {
                 System.out.println("No Conenction:" + status);
@@ -115,15 +101,23 @@ public class BluetoothLeConnector extends Observable {
              * sensor. It must be called AFTER the onServicesDiscovered callback
              * is received.
              */
-            int id = messageQueue.pop();
-            callFunctionByID(id);
+            if (messageQueue.size() > 0) {
+                int id = messageQueue.pop();
+                callFunctionByID(id);
+            }
         }
     };
 
 
-    BluetoothLeConnector(Context context) {
+    BluetoothLeConnector(Context context, BluetoothAdapter btAdapter) {
         this.context = context;
+        this.adapter = btAdapter;
         //startScan();
+    }
+
+    public void disconnect() {
+        bluetoothGatt.disconnect();
+        bluetoothGatt.close();
     }
 
 
@@ -133,6 +127,11 @@ public class BluetoothLeConnector extends Observable {
         } else {
             System.out.println("null device!");
         }
+    }
+
+    public void connectToString(String str) {
+        BluetoothDevice device = adapter.getRemoteDevice(str);
+        connectTo(device);
     }
 
     private void callFunctionByID(int id) {
@@ -190,8 +189,8 @@ public class BluetoothLeConnector extends Observable {
         // Temperature
         int temp = (upperTempByte << 8) + lowerTempByte;
         temperature = -46.85f + (175.72f/65536f) * (float)temp;
-//        System.out.println("Humidity: " + humidity);
-//        System.out.println("Temperature: " + temperature);
+        // System.out.println("Humidity: " + humidity);
+        // System.out.println("Temperature: " + temperature);
     }
 
     private void calculateAcceleration(BluetoothGattCharacteristic characteristic) {
@@ -217,13 +216,14 @@ public class BluetoothLeConnector extends Observable {
         accY = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT8, 1);
         accZ = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT8, 2) * -1;
         accMax = Math.max(Math.max(Math.abs(accX), Math.abs(accY)), Math.abs(accZ));
-        System.out.println("Acc X: " + accX + " Y: " + accY + " Z: " + accZ);
+        // System.out.println("Acc X: " + accX + " Y: " + accY + " Z: " + accZ);
+        setChanged();
         notifyObservers(getSensorData());
     }
 
     public SensorData getSensorData() {
         BluetoothDevice dev = bluetoothGatt.getDevice();
-        SensorData sens = new SensorData(dev.getName(), dev.getAddress(), temperature, humidity, accMax, accX, accY, accZ);
+        SensorData sens = new SensorData(dev.getName(), dev.getAddress(), temperature, humidity, accX, accY, accZ);
         return sens;
     }
 

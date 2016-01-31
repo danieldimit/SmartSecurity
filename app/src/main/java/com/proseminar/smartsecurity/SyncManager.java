@@ -1,7 +1,6 @@
 package com.proseminar.smartsecurity;
 
-import android.app.Application;
-
+import java.util.LinkedList;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -13,6 +12,7 @@ public class SyncManager {
     private static SyncManager instance = new SyncManager();
     private static Observable observed;
     private static volatile BluetoothLeConnector bluetoothLeConnector;
+    private static volatile LinkedList<Observer> observer = new LinkedList<Observer>();
 
     public static SyncManager getInstance() {
         return instance;
@@ -31,9 +31,19 @@ public class SyncManager {
 
     public static void setBluetoothLeConnector(BluetoothLeConnector connector) {
         bluetoothLeConnector = connector;
+        if (observer.size() > 0) {
+            for (int i = 0; i < observer.size(); i++) {
+                bluetoothLeConnector.addObserver(observer.get(i));
+            }
+            observer = new LinkedList<Observer>();
+        }
     }
 
     public static void setObserver(Observer obs) {
-        bluetoothLeConnector.addObserver(obs);
+        if (bluetoothLeConnector == null) {
+            observer.add(obs);
+        } else {
+            bluetoothLeConnector.addObserver(obs);
+        }
     }
 }
