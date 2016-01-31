@@ -72,7 +72,9 @@ public class SensorCollection {
     }
 
     public static void addSensor(Sensor sensor) {
-        sensors.add(sensor);
+        if (sensors != null) {
+            sensors.add(sensor);
+        }
     }
 
     public void removeSensor(String sensorId) {
