@@ -1,50 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
-    <TextView
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/sensors_in_range"
+            android:background="#333333"
+            android:textSize="35sp"
+            android:textColor="#ffd900"
+            android:padding="10dp"
+            android:fontFamily="sans-serif-light"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="10dp"
+            android:background="#ffd900"
+            />
+
+        <ListView
+            android:id="@+id/list_sensors"
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:layout_marginBottom="80dp"
+            >
+
+        </ListView>
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+
+
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/sensors_in_range"
-        android:background="#333333"
-        android:textSize="35sp"
-        android:textColor="#ffd900"
-        android:padding="10dp"
-        android:fontFamily="sans-serif-light"/>
+        android:layout_alignParentBottom="true">
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="10dp"
-        android:background="#ffd900"
-        />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="10dp"
+            android:background="#ffd900"
+            />
 
-    <ListView
-        android:id="@+id/list_sensors"
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        >
+        <TextView
+            android:id="@+id/refresh_button_sensors"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:gravity="center_horizontal"
+            android:text="@string/refresh_button_sensor"
+            android:background="#00ccd6"
+            android:textSize="50sp"
+            android:textColor="#333333"
+            android:fontFamily="sans-serif-light" />
 
-    </ListView>
+    </LinearLayout>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="10dp"
-        android:background="#ffd900"
-        />
 
-    <TextView
-        android:id="@+id/refresh_button_sensors"
-        android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:gravity="center_horizontal"
-        android:text="@string/refresh_button_sensor"
-        android:background="#00ccd6"
-        android:textSize="50sp"
-        android:textColor="#333333"
-        android:fontFamily="sans-serif-light" />
 
-</LinearLayout>
+</RelativeLayout>

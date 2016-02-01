@@ -39,11 +39,11 @@ public final class SensorDataUpdater implements Observer {
 			for (Sensor s: mySensorHandler.databaseToString()) {
 				if(s.getSensorId().equals(sensorData.getMacAddress())) {
 					sensorData.setName(s.getName());
+					result.addSensorData(sensorData);
+					Log.e(TAG, "Updated with " + sensorData.getTemp() + "  " + sensorData.getMacAddress() + "  " + sensorData.getName());
 					break;
 				}
 			}
-			result.addSensorData(sensorData);
-			Log.e(TAG, "Updated with " + sensorData.getTemp() +  "  " + sensorData.getMacAddress() + "  " + sensorData.getName());
 		}
 		return result;
 	}
