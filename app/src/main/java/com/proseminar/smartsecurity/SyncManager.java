@@ -34,6 +34,7 @@ public class SyncManager {
         if (observer.size() > 0) {
             for (int i = 0; i < observer.size(); i++) {
                 bluetoothLeConnector.addObserver(observer.get(i));
+                System.out.println("added Observer later!");
             }
             observer = new LinkedList<Observer>();
         }
@@ -44,6 +45,7 @@ public class SyncManager {
             observer.add(obs);
         } else {
             bluetoothLeConnector.addObserver(obs);
+            System.out.println("added Observer!");
         }
     }
 }

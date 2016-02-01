@@ -143,7 +143,8 @@ public class SensorDataCollectorService extends Service {
 		@Override
 		public void removeBluetoothConnection (String macAdress) throws RemoteException {
 			// Remove sensor with macAdress
-			mBLEConnector.disconnect();
+			System.out.println("-----------remove BLE: " + macAdress);
+			mBLEConnector.disconnect(macAdress);
 		}
 		
 	};

@@ -43,8 +43,7 @@ public final class SensorDataUpdater implements Observer {
 				}
 			}
 			result.addSensorData(sensorData);
-			Log.e(TAG, "Updated with " + String.format("%.2f", sensorData.getTemp()) +  "  " +
-					sensorData.getMacAddress() + "  " + sensorData.getName());
+			Log.e(TAG, "Updated with " + sensorData.getTemp() +  "  " + sensorData.getMacAddress() + "  " + sensorData.getName());
 		}
 		return result;
 	}

@@ -25,6 +25,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -89,6 +90,8 @@ public class SensorListActivity extends AppCompatActivity {
         mySensorHandle = new SensorDbHandler(this, "doesn't matter", null ,1);
         System.out.println("Sensoren");
 
+        checkPermissions();
+        initializeBT();
 
 
         final ListView listView = (ListView) findViewById(R.id.list_sensors);
@@ -96,7 +99,6 @@ public class SensorListActivity extends AppCompatActivity {
                 android.R.layout.simple_list_item_1,
                 listItems);
         listView.setAdapter(adapter);
-
 
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -116,11 +118,27 @@ public class SensorListActivity extends AppCompatActivity {
 
         //---
         System.out.println("Created!");
-        checkPermissions();
-        initializeBT();
+
         // mBLEConnector = manager.getConnector();
         //manager.setBluetoothLeConnector(mBLEConnector);
         startScan(10000);
+        CharSequence text = "Scanning";
+        int duration = Toast.LENGTH_SHORT;
+
+        for (int i=0; i < 5; i++) {
+            Toast toast = Toast.makeText(context, text, duration);
+            toast.show();
+        }
+
+        TextView tv = (TextView) findViewById(R.id.refresh_button_sensors);
+        tv.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                finish();
+                startActivity(getIntent());
+            }
+        });
     }
 
     private void checkPermissions() {
