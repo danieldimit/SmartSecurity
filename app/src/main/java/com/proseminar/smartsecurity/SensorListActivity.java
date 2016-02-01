@@ -164,6 +164,7 @@ public class SensorListActivity extends AppCompatActivity {
             newDeviceFound(device);
         }
     };
+
     public void startScan(int period) {
         btAdapter.startLeScan(leScanCallback);
         mHandler.postDelayed(new Runnable() {

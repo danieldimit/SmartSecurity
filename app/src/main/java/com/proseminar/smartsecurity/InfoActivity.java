@@ -134,16 +134,6 @@ public class InfoActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
-        try {
-            api.removeListener(collectorListener);
-            unbindService(serviceConnection);
-        } catch (Throwable t) {
-            // catch any issues, typical for destroy routines
-            // even if we failed to destroy something, we need to continue destroying
-            Log.w(TAG, "Failed to unbind from the service", t);
-        }
-
         Log.i(TAG, "Activity destroyed");
     }
 
@@ -184,6 +174,14 @@ public class InfoActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         t.interrupt();
+        try {
+            api.removeListener(collectorListener);
+            unbindService(serviceConnection);
+        } catch (Throwable t) {
+            // catch any issues, typical for destroy routines
+            // even if we failed to destroy something, we need to continue destroying
+            Log.w(TAG, "Failed to unbind from the service", t);
+        }
     }
 
     private void initializeInfoUI() {

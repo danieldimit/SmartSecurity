@@ -31,8 +31,8 @@ public final class SensorDataUpdater implements Observer {
 		mySensorHandler = new SensorDbHandler(x, "some", null, 1);
 
 		result = new SensorDataUpdateResult();
-
 		Sensor sList[] = mySensorHandler.databaseToString();
+
 		if (sList != null) {
 
 			// Set the right name.
