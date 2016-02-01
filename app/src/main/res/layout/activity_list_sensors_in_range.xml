@@ -24,9 +24,26 @@
         android:id="@+id/list_sensors"
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="445dp"
         >
 
     </ListView>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="10dp"
+        android:background="#ffd900"
+        />
+
+    <TextView
+        android:id="@+id/refresh_button_sensors"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:gravity="center_horizontal"
+        android:text="@string/refresh_button_sensor"
+        android:background="#00ccd6"
+        android:textSize="50sp"
+        android:textColor="#333333"
+        android:fontFamily="sans-serif-light" />
 
 </LinearLayout>
