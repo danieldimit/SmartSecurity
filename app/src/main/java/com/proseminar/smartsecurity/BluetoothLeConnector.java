@@ -147,9 +147,18 @@ public class BluetoothLeConnector extends Observable {
     }
 
     public void disconnect(String address) {
-        BluetoothGatt bg = gatts.remove(address);
-        bg.disconnect();
-        bg.close();
+        if (gatts.containsKey(address)) {
+            BluetoothGatt bg = gatts.get(address);
+            if (bg != null) {
+                bg.disconnect();
+                bg.close();
+            } else {
+                System.out.println("Null gatts!");
+            }
+            gatts.remove(address);
+        } else {
+            System.out.println("No such Key! " + address);
+        }
     }
 
     public void disconnect() {

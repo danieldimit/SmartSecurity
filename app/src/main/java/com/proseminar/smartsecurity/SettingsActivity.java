@@ -411,6 +411,12 @@ public class SettingsActivity extends AppCompatActivity {
                     .setPositiveButton("Yes",new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog,int id) {
                             Sensor sensorHolder = new Sensor(myAwesomeNameViewSensors[i].getText().toString(), null);
+                            for (Sensor s: mySensorHandler.databaseToString()) {
+                                if(s.getName().equals(myAwesomeNameViewSensors[i].getText().toString())) {
+                                    sensorHolder = s;
+                                    break;
+                                }
+                            }
                             mySensorHandler.deleteSensor(sensorHolder);
                             Intent intent = getIntent();
                             try {
