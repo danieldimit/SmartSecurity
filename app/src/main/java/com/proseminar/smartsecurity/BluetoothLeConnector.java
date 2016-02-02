@@ -22,6 +22,9 @@ import java.util.UUID;
 /**
  * Created by christian on 28.01.16.
  */
+
+
+
 public class BluetoothLeConnector extends Observable {
 
 
@@ -29,7 +32,7 @@ public class BluetoothLeConnector extends Observable {
     private Context context;
     private BluetoothAdapter adapter;
     private List<BluetoothGattService> services = new LinkedList<>();
-    private LinkedList<Integer> messageQueue = new LinkedList<>();
+    private LinkedList<Message> messageQueue = new LinkedList<>();
 
 
     private final UUID UUID_HUM_SERV = UUID.fromString("f000aa20-0451-4000-b000-000000000000");
@@ -49,10 +52,32 @@ public class BluetoothLeConnector extends Observable {
 
     private HashMap<String, Double> humidity = new HashMap<>();
     private HashMap<String, Double> temperature = new HashMap<>();
-    private double accX = 0;
-    private double accY = 0;
-    private double accZ = 0;
-    private double accMax = 0;
+    private HashMap<String, Acceleration> acc = new HashMap<>();
+
+    public class Message {
+        private int id;
+        private String address;
+        Message (int i, String s) {
+            id = i;
+            address = s;
+        }
+        public int getId() { return id; }
+        public String getAddress() { return address; }
+    }
+
+    public class Acceleration {
+        private int aX;
+        private int aY;
+        private int aZ;
+        Acceleration (int x, int y, int z) {
+            aX = x;
+            aY = y;
+            aZ = z;
+        }
+        public int getX() { return aX; }
+        public int getY() { return aY; }
+        public int getZ() { return aZ; }
+    }
 
 
     private final BluetoothGattCallback btleGattCallback = new BluetoothGattCallback() {
@@ -73,9 +98,10 @@ public class BluetoothLeConnector extends Observable {
                 calculateTempSensi(characteristic, gatt);
             }
             if (messageQueue.size() > 0) {
-                int id = messageQueue.pop();
-                callFunctionByID(id, gatt);
-                System.out.println("Activate Function: " + id);
+                Message m = messageQueue.getFirst();
+                messageQueue.removeFirst();
+                callFunctionByMessage(m);
+                System.out.println("Activate Function on Change: " + m.getId());
             }
         }
 
@@ -84,9 +110,10 @@ public class BluetoothLeConnector extends Observable {
                                           BluetoothGattCharacteristic characteristic, int status) {
 
             if (messageQueue.size() > 0) {
-                int id = messageQueue.pop();
-                callFunctionByID(id, gatt);
-                System.out.println("Activate Function: " + id);
+                Message m = messageQueue.getFirst();
+                messageQueue.removeFirst();
+                callFunctionByMessage(m);
+                System.out.println("Activate Function on Write: " + m.getId());
             }
         }
 
@@ -97,10 +124,12 @@ public class BluetoothLeConnector extends Observable {
                 System.out.println("Fick ja!");
                 messageQueue = new LinkedList<>();
                 gatt.discoverServices();
+            } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+                System.out.println("Disconnected!");
+                disconnect(gatt.getDevice().getAddress());
             } else {
                 System.out.println("No Conenction:" + status);
                 connectTo(gatt.getDevice());
-
             }
         }
 
@@ -113,18 +142,24 @@ public class BluetoothLeConnector extends Observable {
             for (int i = 0; i < services.size(); i++) {
                 BluetoothGattService s = services.get(i);
                 if (s.getUuid().equals(UUID_HUM_SERV)) {
-                    messageQueue.push(10);
-                    messageQueue.push(20);
+                    Message m10 = new Message(10, gatt.getDevice().getAddress());
+                    Message m20 = new Message(20, gatt.getDevice().getAddress());
+                    messageQueue.add(m10);
+                    messageQueue.add(m20);
                 }
                 else if (s.getUuid().equals(UUID_ACC_SERV)) {
-                    messageQueue.push(11);
-                    messageQueue.push(21);
+                    Message m11 = new Message(11, gatt.getDevice().getAddress());
+                    Message m21 = new Message(21, gatt.getDevice().getAddress());
+                    messageQueue.add(m11);
+                    messageQueue.add(m21);
                 }
                 else if (s.getUuid().equals(UUID_SENSI_HUM_SERV)) {
-                    messageQueue.push(30);
+                    Message m30 = new Message(30, gatt.getDevice().getAddress());
+                    messageQueue.add(m30);
                 }
                 else if (s.getUuid().equals(UUID_SENSI_TEMP_SERV)) {
-                    messageQueue.push(31);
+                    Message m31 = new Message(31, gatt.getDevice().getAddress());
+                    messageQueue.add(m31);
                 }
             }
             /**
@@ -133,8 +168,10 @@ public class BluetoothLeConnector extends Observable {
              * is received.
              */
             if (messageQueue.size() > 0) {
-                int id = messageQueue.pop();
-                callFunctionByID(id, gatt);
+                Message m = messageQueue.getFirst();
+                messageQueue.removeFirst();
+                callFunctionByMessage(m);
+                System.out.println("Activate Function on Services: " + m.getId());
             }
         }
     };
@@ -152,6 +189,10 @@ public class BluetoothLeConnector extends Observable {
             if (bg != null) {
                 bg.disconnect();
                 bg.close();
+                humidity.put(address, 0.00);
+                temperature.put(address, 0.00);
+                setChanged();
+                notifyObservers(getSensorData(bg));
             } else {
                 System.out.println("Null gatts!");
             }
@@ -187,7 +228,10 @@ public class BluetoothLeConnector extends Observable {
         connectTo(device);
     }
 
-    private void callFunctionByID(int id, BluetoothGatt gatt) {
+    private void callFunctionByMessage(Message m) {
+        int id = m.getId();
+        BluetoothGatt gatt = gatts.get(m.getAddress());
+        System.out.println("Call Function: " + id);
         switch (id) {
             case 10:
                 turnOnService(gatt, UUID_HUM_SERV, UUID_HUM_CONF);
@@ -249,8 +293,11 @@ public class BluetoothLeConnector extends Observable {
         int temp = (upperTempByte << 8) + lowerTempByte;
         double t = -46.85f + (175.72f/65536f) * (float)temp;
         temperature.put(address, t);
-        // System.out.println("Humidity: " + humidity);
-        // System.out.println("Temperature: " + temperature);
+         System.out.println("Humidity: " + humidity);
+         System.out.println("Temperature: " + temperature);
+        SensorData sd = getSensorData(gatt);
+        setChanged();
+        notifyObservers(sd);
     }
 
     private void calculateAcceleration(BluetoothGattCharacteristic characteristic, BluetoothGatt gatt) {
@@ -272,11 +319,12 @@ public class BluetoothLeConnector extends Observable {
      *  32 = 2g
      * */
 
-        accX = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT8, 0);
-        accY = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT8, 1);
-        accZ = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT8, 2) * -1;
-        accMax = Math.max(Math.max(Math.abs(accX), Math.abs(accY)), Math.abs(accZ));
-        // System.out.println("Acc X: " + accX + " Y: " + accY + " Z: " + accZ);
+        int accX = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT8, 0);
+        int accY = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT8, 1);
+        int accZ = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_SINT8, 2) * -1;
+         System.out.println("Acc X: " + accX + " Y: " + accY + " Z: " + accZ);
+        Acceleration a = new Acceleration(accX, accY, accZ);
+        acc.put(gatt.getDevice().getAddress(), a);
         setChanged();
         notifyObservers(getSensorData(gatt));
     }
@@ -286,6 +334,9 @@ public class BluetoothLeConnector extends Observable {
         double fl  = (double) ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN).getFloat();
         String address = gatt.getDevice().getAddress();
         humidity.put(address, fl);
+        SensorData sd = getSensorData(gatt);
+        setChanged();
+        notifyObservers(sd);
     }
 
     private void calculateTempSensi(BluetoothGattCharacteristic chara, BluetoothGatt gatt) {
@@ -294,7 +345,6 @@ public class BluetoothLeConnector extends Observable {
         String address = gatt.getDevice().getAddress();
         temperature.put(address, fl);
         SensorData sd = getSensorData(gatt);
-        System.out.println("SensorData: " + sd.getName() + "  " + sd.getTemp() + "  " + sd.getMacAddress());
         setChanged();
         notifyObservers(sd);
     }
@@ -304,8 +354,17 @@ public class BluetoothLeConnector extends Observable {
         String address = dev.getAddress();
         double temp = temperature.get(address);
         double hum = humidity.get(address);
+        int accX = 0;
+        int accY = 0;
+        int accZ = 0;
+        Acceleration a = acc.get(address);
+        if (a != null) {
+            accX = a.getX();
+            accY = a.getY();
+            accZ = a.getZ();
+        }
         String name = dev.getName();
-        System.out.println("Temp: " + temp + " Humi: " + hum + " Name: " + name + " Adresse: " + address);
+        System.out.println("Temp: " + temp + " Humi: " + hum + " Name: " + name + " Adresse: " + address + "AccX: " + accX + " AccY: " + accY + " AccX: " + accZ);
         SensorData sens = new SensorData(name, address, temp, hum, accX, accY, accZ);
         return sens;
     }

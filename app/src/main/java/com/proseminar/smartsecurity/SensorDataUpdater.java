@@ -2,6 +2,8 @@ package com.proseminar.smartsecurity;
 
 import android.content.Context;
 import android.util.Log;
+
+import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -11,11 +13,12 @@ public final class SensorDataUpdater implements Observer {
 
 	private SensorDbHandler mySensorHandler;
 	private SensorData sensorData;
+	private HashMap<String, SensorData> sensorDataHashMap = new HashMap<>();
 
 	public SensorDataUpdater () {
 		SyncManager manager = SyncManager.getInstance();
 		manager.setObserver(this);
-		sensorData = new SensorData("","",0,0,0,0,0);
+		sensorData = new SensorData("Name","adress",0,0,0,0,0);
 	}
 
 	/**
@@ -37,11 +40,13 @@ public final class SensorDataUpdater implements Observer {
 
 			// Set the right name.
 			for (Sensor s: mySensorHandler.databaseToString()) {
-				if(s.getSensorId().equals(sensorData.getMacAddress())) {
-					sensorData.setName(s.getName());
-					result.addSensorData(sensorData);
-					Log.e(TAG, "Updated with " + sensorData.getTemp() + "  " + sensorData.getMacAddress() + "  " + sensorData.getName());
-					break;
+				SensorData sd = sensorDataHashMap.get(s.getSensorId());
+				if (sd != null) {
+					if (s.getSensorId().equals(sd.getMacAddress())) {
+						sd.setName(s.getName());
+						result.addSensorData(sd);
+						Log.e(TAG, "Updated with " + sd.getTemp() + "  " + sd.getMacAddress() + "  " + sd.getName());
+					}
 				}
 			}
 		}
@@ -50,6 +55,7 @@ public final class SensorDataUpdater implements Observer {
 
 	@Override
 	public void update(Observable observable, Object data) {
-		sensorData = (SensorData) data;
+		SensorData sd = (SensorData) data;
+		sensorDataHashMap.put(sd.getMacAddress(), sd);
 	}
 }
