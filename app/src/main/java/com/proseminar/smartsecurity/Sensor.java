@@ -26,6 +26,15 @@ public class Sensor {
 	private double[] accelerometer;
 	private int valIndex;
 	private int dataCounter;
+	
+	private double[] newtemps[];
+	private double x;
+	private double y;
+	private double z;
+	private double xold;
+	private double yold;
+	private double zold;
+	private static newCap = 0.1;
 
 	public Sensor(String name, String macAddress) {
 		for (String str : sensorNames) {
@@ -34,11 +43,14 @@ public class Sensor {
 						+ macAddress + ", is already paired.");
 			}
 		}
+
 		this.macAddress = macAddress;
 		this.name = name;
 		temperature = new double[numberOfPastValues];
 		valIndex = 0;
 		dataCounter = 0;
+		
+		newtemps = new double[6];
 	}
 
 	public boolean idFits(SensorData sd) {
@@ -55,26 +67,67 @@ public class Sensor {
 	// adds the newest value to the array and returns true if there's enough data collected to start identifying possible threats
 	public boolean updateSensorData(SensorData sd) {
 		double newTemp = sd.getTemp();
-		temperature[valIndex] = newTemp;
-		valIndex++;
-		if (valIndex == numberOfPastValues)
-			valIndex = 0;
-
-		if (dataCounter == numberOfPastValues) {
-			return true;
-		} else {
+		
+		newtemps[5] = newtemps[4];
+		newtemps[4] = newtemps[3];
+		newtemps[3] = newtemps[2];
+		newtemps[2] = newtemps[1];
+		newtemps[1] = newtemps[0];
+		newtemps[0] = newTemp;
+		
+		if (dataCounter < 30)
 			dataCounter++;
+		
+		xold = x;
+		yold = y;
+		zold = z;
+		x = sd.getAccX();
+		y = sd.getAccY();
+		z = sd.getAccZ();
+		
+		if (dataCounter < 30)
 			return false;
-		}
+		else
+			return true;
+		
+		//temperature[valIndex] = newTemp;
+		//valIndex++;
+		//if (valIndex == numberOfPastValues)
+		//	valIndex = 0;
+s
+		//if (dataCounter == numberOfPastValues) {
+		//	return true;
+		//} else {
+		//	dataCounter++;
+		//	return false;
+		//}
 	}
 
 	// returns how confident the sensor is that the newest values indicate a threat
 	public double calcRobberyConfidence() {
-		if (dataCounter < numberOfPastValues)
+		if (dataCounter < 30)
 			return 0.0d;
+		
+		double sum = newtemps[]
+		
+		for (int i = 5; i > 0; i--)
+		{
+			sum += Math.pow(Math.abs(newtemps[i] - newtemps[i - 1]), (4 / 3));
+		}
+		
+		double dx = Math.Abs(x - xold);
+		double dy = Math.Abs(y - yold);
+		double dz = Math.Abs(z - zold);
+		
+		If (dx >= 2.0d || dy >= 2.0d || dz >= 2.0d)
+			return 1.0d;
+		
+		
+		return Math.min(sum / (newCap * 2), 1);
+		
 
 		// -------------- Regression
-
+		/*
 		double sum_w = 0;
 		double sum_wxy = 0;
 		double sum_wx = 0;
@@ -127,7 +180,8 @@ public class Sensor {
 		// ----------------- Confidence
 
 		double confidence = Math.min(sum / (halfConfCap * 2), 1);
-
+		*/
+		
 		return confidence;
 	}
 
