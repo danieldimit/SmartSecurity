@@ -27,14 +27,14 @@ public class Sensor {
 	private int valIndex;
 	private int dataCounter;
 	
-	private double[] newtemps[];
+	private double[] newtemps;
 	private double x;
 	private double y;
 	private double z;
 	private double xold;
 	private double yold;
 	private double zold;
-	private static newCap = 0.1;
+	private static double newCap = 0.12;
 
 	public Sensor(String name, String macAddress) {
 		for (String str : sensorNames) {
@@ -94,7 +94,7 @@ public class Sensor {
 		//valIndex++;
 		//if (valIndex == numberOfPastValues)
 		//	valIndex = 0;
-s
+
 		//if (dataCounter == numberOfPastValues) {
 		//	return true;
 		//} else {
@@ -108,18 +108,19 @@ s
 		if (dataCounter < 30)
 			return 0.0d;
 		
-		double sum = newtemps[]
+		double sum = 0.0d;
 		
 		for (int i = 5; i > 0; i--)
 		{
-			sum += Math.pow(Math.abs(newtemps[i] - newtemps[i - 1]), (4 / 3));
+			if (newtemps[i] > newtemps[i - 1])
+				sum += Math.pow(Math.abs(newtemps[i] - newtemps[i - 1]), (4 / 3));
 		}
 		
-		double dx = Math.Abs(x - xold);
-		double dy = Math.Abs(y - yold);
-		double dz = Math.Abs(z - zold);
+		double dx = Math.abs(x - xold);
+		double dy = Math.abs(y - yold);
+		double dz = Math.abs(z - zold);
 		
-		If (dx >= 2.0d || dy >= 2.0d || dz >= 2.0d)
+		if (dx >= 3.0d || dy >= 3.0d || dz >= 3.0d)
 			return 1.0d;
 		
 		
@@ -182,7 +183,7 @@ s
 		double confidence = Math.min(sum / (halfConfCap * 2), 1);
 		*/
 		
-		return confidence;
+		//return confidence;
 	}
 
 	public String getSensorId() { return macAddress; }

@@ -47,10 +47,11 @@ public class SensorCollection {
                 if (sensor.idFits(sd)) {
                     if (sensor.updateSensorData(sd)) {
                         double conf = sensor.calcRobberyConfidence();
+                        Log.e(TAG, "---------------------------" + Double.toString(conf) + " || " + Double.toString(sd.getAccX()) + " || " + Double.toString(sd.getAccY()) + " || " + Double.toString(sd.getAccZ()) + "-------------------------------");
                         if (alarmIsOn && conf >= 0.8) {
                              if (!notified) {
                                  Log.e(TAG, "++++++++++++++++++++++++ SMS SENT ++++++++++++++++++++++++");
-                                 // notifySMS(sensor.getName());
+                                 notifySMS(sensor.getName(), conf);
                                  notified = true;
                              }
                         }
@@ -61,11 +62,11 @@ public class SensorCollection {
         }
     }
 
-    private void notifySMS(String room) {
+    private void notifySMS(String room, double conf) {
         contact = myHandle.databaseToString();
         if (!(contact == null)) {
             for (Contact cont: contact) {
-                Sms.sendSMS(cont.getNumber(), "SmartSecurity detected a possible threat in the " + room + ".");
+                Sms.sendSMS(cont.getNumber(), "SmartSecurity detected a possible threat in the " + room + " with a confidence of " + Long.toString(Math.round(conf * 100.0d)) + "%.");
             }
         }
 
