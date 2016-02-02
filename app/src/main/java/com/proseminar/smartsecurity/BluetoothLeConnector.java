@@ -364,7 +364,7 @@ public class BluetoothLeConnector extends Observable {
             accZ = a.getZ();
         }
         String name = dev.getName();
-        System.out.println("Temp: " + temp + " Humi: " + hum + " Name: " + name + " Adresse: " + address + "AccX: " + accX + " AccY: " + accY + " AccX: " + accZ);
+       // System.out.println("Temp: " + temp + " Humi: " + hum + " Name: " + name + " Adresse: " + address + "AccX: " + accX + " AccY: " + accY + " AccX: " + accZ);
         SensorData sens = new SensorData(name, address, temp, hum, accX, accY, accZ);
         return sens;
     }
