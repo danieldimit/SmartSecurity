@@ -25,7 +25,6 @@
             android:text="@string/alarm_warning_text_top"
             android:textSize="35sp"
             android:textColor="#efefef"
-            android:textStyle="bold"
             android:fontFamily="sans-serif-thin"/>
 
         <TextView
@@ -36,7 +35,8 @@
             android:textSize="200sp"
             android:text="30"
             android:textColor="#00ccd6"
-            android:fontFamily="sans-serif-medium"/>
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-thin"/>
 
         <TextView
             android:id="@+id/text_bottom"
@@ -47,7 +47,6 @@
             android:text="@string/alarm_warning_text_bottom"
             android:textSize="35sp"
             android:textColor="#efefef"
-            android:textStyle="bold"
             android:fontFamily="sans-serif-thin"/>
 
     </LinearLayout>
@@ -72,7 +71,6 @@
         android:text="@string/cancelButton"
         android:background="#00ccd6"
         android:textSize="50sp"
-        android:textStyle="bold"
         android:textColor="#333333"
         android:fontFamily="sans-serif-light" />
 

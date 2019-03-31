@@ -21,6 +21,7 @@ public class SensorDataAdapter extends ArrayAdapter<SensorData> {
     public View getView(int position, View convertView, ViewGroup parent) {
         // Get the data item for this position
         SensorData sensorData = getItem(position);
+
         // Check if an existing view is being reused, otherwise inflate the view
         if (convertView == null) {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.grid_item_info, parent, false);
@@ -28,10 +29,13 @@ public class SensorDataAdapter extends ArrayAdapter<SensorData> {
         // Lookup view for data population
         TextView tvRoom = (TextView) convertView.findViewById(R.id.tvRoom);
         TextView tvTemp = (TextView) convertView.findViewById(R.id.tvTemp);
-        // TODO: add sensor name to SensorData.
+        TextView tvHumid = (TextView) convertView.findViewById(R.id.tvHumid);
+
         // Populate the data into the template view using the data object
-        tvRoom.setText(sensorData.getSensorId());
-        tvTemp.setText(Double.toString(sensorData.getTemp()) + " °C");
+        tvRoom.setText(sensorData.getName());
+        tvTemp.setText(String.format("%.1f", sensorData.getTemp()) + "°C");
+        tvHumid.setText(String.format("%.1f", sensorData.getHumidity()) + "%");
+
         // Return the completed view to render on screen
         return convertView;
     }

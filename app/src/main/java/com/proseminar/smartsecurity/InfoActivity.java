@@ -1,14 +1,20 @@
 package com.proseminar.smartsecurity;
 
+import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -21,6 +27,8 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static android.support.v4.app.ActivityCompat.startActivityForResult;
 
@@ -35,6 +43,8 @@ public class InfoActivity extends AppCompatActivity {
     static final String KEY = "alarm_status";
     private static final String TAG = InfoActivity.class.getSimpleName();
 
+    Resources res;
+
     // Recalls the last state - ON or OFF
     private SharedPreferences mPrefs;
     private boolean currentStatus;
@@ -42,14 +52,13 @@ public class InfoActivity extends AppCompatActivity {
     boolean connected;
 
     BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-    private final static int REQUEST_ENABLE_BT=1;
 
     // UI Elements
     GridView gridView;
 
-    List<SensorData> sDataList;
-
     Context context = this;
+
+    Thread t;
 
     private ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
@@ -85,14 +94,35 @@ public class InfoActivity extends AppCompatActivity {
         }
     };
 
+    private Timer timer;
+    private TimerTask updateInfo = new TimerTask() {
+        @Override
+        public void run() {
+            updateGridView();
+        }
+    };
+
+    private BluetoothLeConnector mBLEConnector;
+    private BluetoothAdapter btAdapter;
+    private static final int REQUEST_ENABLE_BT = 1;
+    private int MY_PERMISSIONS_REQUEST_ACCESS_LOCATION = 2;
+    private SyncManager manager = SyncManager.getInstance();
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
-
         mPrefs = getSharedPreferences("latest_alarm_status", Context.MODE_PRIVATE);
         currentStatus = mPrefs.getBoolean(KEY, OFF);
+
+        System.out.println("Created!");
+
+        int permissionCheck = ContextCompat.checkSelfPermission(this,
+                Manifest.permission.SEND_SMS);
+        System.out.print(permissionCheck);
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.SEND_SMS},
+                10);
 
         Log.e(TAG, Boolean.toString(currentStatus));
         if (currentStatus) {
@@ -104,16 +134,6 @@ public class InfoActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
-        try {
-            api.removeListener(collectorListener);
-            unbindService(serviceConnection);
-        } catch (Throwable t) {
-            // catch any issues, typical for destroy routines
-            // even if we failed to destroy something, we need to continue destroying
-            Log.w(TAG, "Failed to unbind from the service", t);
-        }
-
         Log.i(TAG, "Activity destroyed");
     }
 
@@ -126,16 +146,66 @@ public class InfoActivity extends AppCompatActivity {
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         }
         initializeInfoUI();
+
+        res = getResources();
+        final int updateSeconds = res.getInteger(R.integer.ui_update_info_page);
+
+        t = new Thread() {
+            @Override
+            public void run() {
+                try {
+                    while (!isInterrupted()) {
+                        Thread.sleep(updateSeconds);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                updateGridView();
+                            }
+                        });
+                    }
+                } catch (InterruptedException e) {
+                }
+            }
+        };
+        t.start();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        t.interrupt();
+        try {
+            api.removeListener(collectorListener);
+            unbindService(serviceConnection);
+        } catch (Throwable t) {
+            // catch any issues, typical for destroy routines
+            // even if we failed to destroy something, we need to continue destroying
+            Log.w(TAG, "Failed to unbind from the service", t);
+        }
     }
 
     private void initializeInfoUI() {
         setContentView(R.layout.activity_info_activity);
 
         //Intent intent = new Intent(SensorDataCollectorService.class.getName());
-        Intent intent = new Intent(SensorDataCollectorService.class.getName());
+        Intent intent;
+        int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+        if (currentapiVersion >= android.os.Build.VERSION_CODES.LOLLIPOP){
+            // Do something for lollipop and above versions
+
+            //intent = new Intent(this, SensorDataCollectorService.class);
+
+            intent = new Intent(SensorDataCollectorService.class.getCanonicalName());
+            // This is the key line that fixed everything for me
+            intent.setPackage("com.proseminar.smartsecurity");
+        } else{
+            // do something for phones running an SDK before lollipop
+
+            intent = new Intent(SensorDataCollectorService.class.getName());
+        }
         this.startService(intent);
 
-        bindService(intent, serviceConnection, 0);
+        this.bindService(intent, serviceConnection, BIND_AUTO_CREATE);
 
         Log.i(TAG, "Activity created");
 
@@ -165,17 +235,22 @@ public class InfoActivity extends AppCompatActivity {
         SensorDataAdapter adapter = new SensorDataAdapter(context, arrayOfUsers);
         // Attach the adapter to a ListView
         gridView.setAdapter(adapter);
-        try {
-            SensorDataUpdateResult sdur = api.getLatestUpdateResult();
-            sDataList = sdur.getSensorData();
-            // Fill with Dummy items
-            if (!(sDataList == null)) {
-                for (SensorData sd : sDataList) {
-                    adapter.add(sd);
+        if (api != null) {
+            try {
+                List<SensorData> sDataList;
+                SensorDataUpdateResult sdur = api.getLatestUpdateResult();
+                sDataList = sdur.getSensorData();
+                // Fill with Dummy items
+                if (sDataList != null) {
+                    for (SensorData sd : sDataList) {
+                        Log.e(TAG, sd.getName() + "  " + sd.getTemp() + "  " + sd.getMacAddress());
+                        adapter.add(sd);
+                    }
                 }
+            } catch (RemoteException e) {
+                e.printStackTrace();
             }
-        } catch (RemoteException e) {
-            e.printStackTrace();
         }
     }
+
 }

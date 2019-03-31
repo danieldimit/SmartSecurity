@@ -1,9 +1,7 @@
 <resources>
-    <string name="app_name">SmartAlarm</string>
+    <string name="app_name">SmartSecurity</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="textAlarm">Alarm</string>
-    <string name="phoneButton1">Add Phone</string>
-    <string name="sensorButton1">Scan for sensors</string>
 
     <string name="title_activity_settings">SettingsActivity</string>
 
@@ -17,4 +15,7 @@
     <string name="cancelButton">Cancel</string>
     <string name="turnOffButton">Stop</string>
     <string name="sensors_in_range">Sensors in range</string>
+    <string name="ble_not_supported">BLE is not supported by this device!</string>
+    <string name="error_bluetooth_not_supported">Bluetooth is not supported by this device!</string>
+    <string name="refresh_button_sensor">Refresh</string>
 </resources>

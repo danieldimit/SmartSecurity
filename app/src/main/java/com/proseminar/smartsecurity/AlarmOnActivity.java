@@ -5,11 +5,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -37,6 +37,8 @@ public class AlarmOnActivity extends AppCompatActivity {
 
     // Count down timers
     private CountDownTimer turnOnTimer;
+
+    Resources res;
 
     private SensorDataCollectorApi api;
 
@@ -76,7 +78,6 @@ public class AlarmOnActivity extends AppCompatActivity {
         currentStatus = mPrefs.getBoolean(KEY, OFF);
         updater = mPrefs.edit();
 
-        Log.e(TAG, "+++++++++++++++ ON CREATE");
         // Set different layouts depending on the status of the alarm.
         if (currentStatus) {
             setContentView(R.layout.activity_alarm_on);
@@ -86,13 +87,15 @@ public class AlarmOnActivity extends AppCompatActivity {
         }
         initButton();
 
+        res = getResources();
+        final int countDownMiliSeconds = res.getInteger(R.integer.ui_alarm_on_countdown);
+
         if (!currentStatus) {
             // Timer counting down the time until the alarm gets turned on (30 000)
-            turnOnTimer = new CountDownTimer(2000, 1000) {
+            turnOnTimer = new CountDownTimer(countDownMiliSeconds, 1000) {
 
                 public void onTick(long millisUntilFinished) {
                     tvSeconds.setText(Integer.toString((int) (millisUntilFinished / 1000)));
-                    Log.e("STOP", "click");
                 }
 
                 // The timer is over the alarm turns on.
@@ -116,11 +119,23 @@ public class AlarmOnActivity extends AppCompatActivity {
             turnOnTimer.start();
         }
 
-        Intent intent = new Intent(SensorDataCollectorService.class.getName());
+        Intent intent;
+        int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+        if (currentapiVersion >= android.os.Build.VERSION_CODES.LOLLIPOP){
+            // Do something for lollipop and above versions
+
+            intent = new Intent(SensorDataCollectorService.class.getCanonicalName());
+            // This is the key line that fixed everything for me
+            intent.setPackage("com.proseminar.smartsecurity");
+        } else{
+            // do something for phones running an SDK before lollipop
+
+            intent = new Intent(SensorDataCollectorService.class.getName());
+        }
         // start the service explicitly.
         // otherwise it will only run while the IPC connection is up.
         this.startService(intent);
-        bindService(intent, serviceConnection, 0);
+        this.bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -135,7 +150,6 @@ public class AlarmOnActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.e(TAG, "+++++++++++++++DSTRY");
         if (!(turnOnTimer == null)) {
             turnOnTimer.cancel();
         }

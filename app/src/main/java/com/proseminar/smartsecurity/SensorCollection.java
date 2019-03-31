@@ -17,13 +17,15 @@ public class SensorCollection {
     Context c;
     private Contact[] contact;
     private final String DATABASE_NAME = "contacts.db";
-    private DbHandler myHandle;
+    private ContactDbHandler myHandle;
     private SensorDbHandler mySensorHandle1;
     private boolean notified;
+    private static final String TAG = SensorCollection.class.getSimpleName();
 
     public SensorCollection(Context c) {
+
         this.c = c;
-        myHandle = new DbHandler(c, DATABASE_NAME, null, 1);
+        myHandle = new ContactDbHandler(c, DATABASE_NAME, null, 1);
         mySensorHandle1 = new SensorDbHandler (c, "sensors.db", null, 1);
         notified = false;
         Sensor[] sa = mySensorHandle1.databaseToString();
@@ -45,10 +47,11 @@ public class SensorCollection {
                 if (sensor.idFits(sd)) {
                     if (sensor.updateSensorData(sd)) {
                         double conf = sensor.calcRobberyConfidence();
-                        if (alarmIsOn && conf >= 0.5) {
+                        Log.e(TAG, "---------------------------" + Double.toString(conf) + " || " + Double.toString(sd.getAccX()) + " || " + Double.toString(sd.getAccY()) + " || " + Double.toString(sd.getAccZ()) + "-------------------------------");
+                        if (alarmIsOn && conf >= 0.8) {
                              if (!notified) {
-                                 Log.e("COLECTION", "++++++++++++++++++++++++++++SMS SENT+++++++++++++++++++++++++");
-                                 // notifySMS();
+                                 Log.e(TAG, "++++++++++++++++++++++++ SMS SENT ++++++++++++++++++++++++");
+                                 notifySMS(sensor.getName(), conf);
                                  notified = true;
                              }
                         }
@@ -59,22 +62,31 @@ public class SensorCollection {
         }
     }
 
-    private void notifySMS() {
+    private void notifySMS(String room, double conf) {
         contact = myHandle.databaseToString();
         if (!(contact == null)) {
             for (Contact cont: contact) {
-                Sms.sendSMS(cont.getNumber(), "SmartSecurity detected a possible threat ");
+                Sms.sendSMS(cont.getNumber(), "SmartSecurity detected a possible threat in the " + room + " with a confidence of " + Long.toString(Math.round(conf * 100.0d)) + "%.");
             }
         }
 
     }
 
     public static void addSensor(Sensor sensor) {
-        sensors.add(sensor);
+        if (sensors != null) {
+            sensors.add(sensor);
+        }
     }
 
-    public void removeSensor(String sensorId) {
-        //
+    public static void removeSensor (String sensorId) {
+        if (sensors != null) {
+            for (Sensor s:sensors) {
+                if (s.getSensorId().equals(sensorId)) {
+                    sensors.remove(s);
+                    break;
+                }
+            }
+        }
     }
 
     public void reset() {

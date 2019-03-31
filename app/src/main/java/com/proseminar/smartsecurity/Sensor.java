@@ -1,41 +1,60 @@
 package com.proseminar.smartsecurity;
 
-import java.lang.reflect.Array;
-import java.security.InvalidParameterException;
+import android.util.Log;
+
 import java.util.ArrayList;
+import java.util.Observable;
+import java.util.Observer;
 
 /**
  * Created by Joachim on 26.01.2016.
  */
 public class Sensor {
-	private static int numberOfPastValues = 10;
+	private static int numberOfPastValues = 60;
 	private static int numberOfPredictedValues = 5;
 	private static int weightNewerValues = 3;
 	private static double halfConfCap = 0.2;
 
 	private static ArrayList<String> sensorNames = new ArrayList<String>();
 
-	private String sensorId;
+	private String macAddress;
 	private String name;
 	private double[] temperature;
+
+
+
 	private double[] accelerometer;
 	private int valIndex;
 	private int dataCounter;
+	
+	private double[] newtemps;
+	private double x;
+	private double y;
+	private double z;
+	private double xold;
+	private double yold;
+	private double zold;
+	private static double newCap = 0.12;
 
-	public Sensor(String name, String sensorId) {
-		for (String str : sensorNames)
-			if (str.equals(sensorId))
-				throw new IllegalArgumentException("The name " + sensorId + " has already been taken.");
+	public Sensor(String name, String macAddress) {
+		for (String str : sensorNames) {
+			if (str.equals(macAddress)) {
+				throw new IllegalArgumentException("The device with MAC-Address:  "
+						+ macAddress + ", is already paired.");
+			}
+		}
 
-		this.sensorId = sensorId;
+		this.macAddress = macAddress;
 		this.name = name;
 		temperature = new double[numberOfPastValues];
 		valIndex = 0;
 		dataCounter = 0;
+		
+		newtemps = new double[6];
 	}
 
 	public boolean idFits(SensorData sd) {
-		return sensorId.equals(sd.getSensorId());
+		return macAddress.equals(sd.getMacAddress());
 	}
 
 	public void resetData() {
@@ -48,27 +67,68 @@ public class Sensor {
 	// adds the newest value to the array and returns true if there's enough data collected to start identifying possible threats
 	public boolean updateSensorData(SensorData sd) {
 		double newTemp = sd.getTemp();
-
-		temperature[valIndex] = newTemp;
-		valIndex++;
-		if (valIndex == numberOfPastValues)
-			valIndex = 0;
-
-		if (dataCounter == numberOfPastValues) {
-			return true;
-		} else {
+		
+		newtemps[5] = newtemps[4];
+		newtemps[4] = newtemps[3];
+		newtemps[3] = newtemps[2];
+		newtemps[2] = newtemps[1];
+		newtemps[1] = newtemps[0];
+		newtemps[0] = newTemp;
+		
+		if (dataCounter < 30)
 			dataCounter++;
+		
+		xold = x;
+		yold = y;
+		zold = z;
+		x = sd.getAccX();
+		y = sd.getAccY();
+		z = sd.getAccZ();
+		
+		if (dataCounter < 30)
 			return false;
-		}
+		else
+			return true;
+		
+		//temperature[valIndex] = newTemp;
+		//valIndex++;
+		//if (valIndex == numberOfPastValues)
+		//	valIndex = 0;
+
+		//if (dataCounter == numberOfPastValues) {
+		//	return true;
+		//} else {
+		//	dataCounter++;
+		//	return false;
+		//}
 	}
 
 	// returns how confident the sensor is that the newest values indicate a threat
 	public double calcRobberyConfidence() {
-		if (dataCounter < numberOfPastValues)
+		if (dataCounter < 30)
 			return 0.0d;
+		
+		double sum = 0.0d;
+		
+		for (int i = 5; i > 0; i--)
+		{
+			if (newtemps[i] > newtemps[i - 1])
+				sum += Math.pow(Math.abs(newtemps[i] - newtemps[i - 1]), (4 / 3));
+		}
+		
+		double dx = Math.abs(x - xold);
+		double dy = Math.abs(y - yold);
+		double dz = Math.abs(z - zold);
+		
+		if (dx >= 3.0d || dy >= 3.0d || dz >= 3.0d)
+			return 1.0d;
+		
+		
+		return Math.min(sum / (newCap * 2), 1);
+		
 
 		// -------------- Regression
-
+		/*
 		double sum_w = 0;
 		double sum_wxy = 0;
 		double sum_wx = 0;
@@ -121,13 +181,23 @@ public class Sensor {
 		// ----------------- Confidence
 
 		double confidence = Math.min(sum / (halfConfCap * 2), 1);
-
-		return confidence;
+		*/
+		
+		//return confidence;
 	}
 
-	public String getSensorId() { return sensorId; }
+	public String getSensorId() { return macAddress; }
 
 	public String getName() { return name; }
 
 	public void setName(String name) { this.name = name; }
+
+	public double[] getTemperature() {
+		return temperature;
+	}
+
+	public double[] getAccelerometer() {
+		return accelerometer;
+	}
+
 }

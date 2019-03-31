@@ -6,7 +6,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-
+/**
+ * Sensor database handler class.
+ */
 public class SensorDbHandler extends SQLiteOpenHelper {
 
     //use if you have only one table
@@ -66,9 +68,7 @@ public class SensorDbHandler extends SQLiteOpenHelper {
     //get String values
     public Sensor[] databaseToString() {
         SQLiteDatabase db = getWritableDatabase();
-        //Cursor cursor = db.rawQuery("SELECT COUNT(*) FROM contacts;", null);
         Sensor[] sensor = new Sensor[db.rawQuery("SELECT " + COLUMN_NAME + " FROM " + TABLE_SENSORS + ";", null).getCount()];
-        //SQLiteDatabase db = getWritableDatabase();
         String query = "SELECT * FROM " + TABLE_SENSORS + " WHERE 1";
         Cursor c = db.rawQuery(query, null);
 

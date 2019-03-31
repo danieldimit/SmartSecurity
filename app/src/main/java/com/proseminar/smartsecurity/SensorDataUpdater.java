@@ -3,17 +3,25 @@ package com.proseminar.smartsecurity;
 import android.content.Context;
 import android.util.Log;
 
-import java.util.ArrayList;
-import java.util.Random;
+import java.util.HashMap;
+import java.util.Observable;
+import java.util.Observer;
 
-public final class SensorDataUpdater {
+public final class SensorDataUpdater implements Observer {
 
 	private static final String TAG = SensorDataUpdater.class.getSimpleName();
 
-	SensorDbHandler mySensorHandler;
+	private SensorDbHandler mySensorHandler;
+	private SensorData sensorData;
+	private HashMap<String, SensorData> sensorDataHashMap = new HashMap<>();
+
+	public SensorDataUpdater () {
+		SyncManager manager = SyncManager.getInstance();
+		manager.setObserver(this);
+		sensorData = new SensorData("Name","adress",0,0,0,0,0);
+	}
 
 	/**
-	 * For Christian
 	 * Gathers data from all sensors and returns a SensorDataUpdateResult object.
 	 * Idea: Run the connection to every sensor in separate thread, gather the data here
 	 * and pack it in a SensorDataUpdateResult object, which would be than returned in
@@ -22,45 +30,32 @@ public final class SensorDataUpdater {
 	 */
 	public SensorDataUpdateResult update(Context x) {
 
+		SensorDataUpdateResult result;
+		mySensorHandler = new SensorDbHandler(x, "some", null, 1);
 
-		SensorDataUpdateResult result = new SensorDataUpdateResult();
-		SensorData sd;
-		Sensor[] sList;
-		ArrayList<SensorData> sdList = new ArrayList<SensorData>();
-		mySensorHandler = new SensorDbHandler(x, "doesn't matter", null ,1);
+		result = new SensorDataUpdateResult();
+		Sensor sList[] = mySensorHandler.databaseToString();
 
-		sList = mySensorHandler.databaseToString();
-
-		// Convert to Sensor Data
 		if (sList != null) {
-			for (Sensor s: sList) {
-				sd = new SensorData(s.getName(), s.getSensorId(), genTemp(), 0 ,0);
-				result.addSensorData(sd);
+
+			// Set the right name.
+			for (Sensor s: mySensorHandler.databaseToString()) {
+				SensorData sd = sensorDataHashMap.get(s.getSensorId());
+				if (sd != null) {
+					if (s.getSensorId().equals(sd.getMacAddress())) {
+						sd.setName(s.getName());
+						result.addSensorData(sd);
+						Log.e(TAG, "Updated with " + sd.getTemp() + "  " + sd.getMacAddress() + "  " + sd.getName());
+					}
+				}
 			}
 		}
-
-
-		// Example for Data from one sensor
-
-		String id = "asdf";
-		String name = "ivan";
-		double temp = 24.1;
-		double hum = 29.4;
-		double acc = 1.2;
-		SensorData exampleSD = new SensorData(name, id, temp, hum, acc);
-
-		// End of example
-
 		return result;
 	}
 
-	private int genTemp() {
-		int min = -15;
-		int max = 20;
-		int value = max - min;
-
-		Random r = new Random();
-		int i1 = r.nextInt(value) + min;
-		return i1;
+	@Override
+	public void update(Observable observable, Object data) {
+		SensorData sd = (SensorData) data;
+		sensorDataHashMap.put(sd.getMacAddress(), sd);
 	}
 }

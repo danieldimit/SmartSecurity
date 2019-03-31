@@ -20,26 +20,35 @@ public final class SensorData implements Parcelable {
 			return new SensorData[size];
 		}
 	};
-	
-	private String sensorId;
+
+	private String name;
+	private String macAddress;
 	private double temp;
 	private double humidity;
-	private double accelometer;
-	private String name;
+	private double accX;
+	private double accY;
+	private double accZ;
 
-	public SensorData(String name, String sensorId, double temp, double humidity, double accelometer) {
+
+
+	public SensorData(String name, String macAddress, double temp, double humidity, double accX, double accY, double accZ) {
 		this.name = name;
-		this.sensorId = sensorId;
+		this.macAddress = macAddress;
 		this.temp = temp;
 		this.humidity = humidity;
-		this.accelometer = accelometer;
+		this.accX = accX;
+		this.accY = accY;
+		this.accZ = accZ;
 	}
 	
 	private SensorData(Parcel source) {
-		sensorId = source.readString();
+		name = source.readString();
+		macAddress = source.readString();
 		temp = source.readDouble();
 		humidity = source.readDouble();
-		accelometer = source.readDouble();
+		accX = source.readDouble();
+		accY = source.readDouble();
+		accZ = source.readDouble();
 	}
 
 	public String getName() {
@@ -47,15 +56,15 @@ public final class SensorData implements Parcelable {
 	}
 
 	public void setSensorId(String sensorId) {
-		this.sensorId = sensorId;
+		this.macAddress = sensorId;
 	}
 
 	public void setName(String name) {
 		this.name = name;
 	}
 
-	public String getSensorId() {
-		return sensorId;
+	public String getMacAddress() {
+		return macAddress;
 	}
 
 	public double getTemp() {
@@ -66,9 +75,11 @@ public final class SensorData implements Parcelable {
 		return humidity;
 	}
 
-	public double getAccelometer() {
-		return accelometer;
-	}
+	public double getAccX() { return accX; }
+
+	public double getAccY() { return accY; }
+
+	public double getAccZ() { return accZ; }
 
 	@Override
 	public int describeContents() {
@@ -77,9 +88,13 @@ public final class SensorData implements Parcelable {
 
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeString(sensorId);
+		dest.writeString(name);
+		dest.writeString(macAddress);
 		dest.writeDouble(temp);
 		dest.writeDouble(humidity);
-		dest.writeDouble(accelometer);
+		dest.writeDouble(accX);
+		dest.writeDouble(accY);
+		dest.writeDouble(accZ);
+
 	}
 }
